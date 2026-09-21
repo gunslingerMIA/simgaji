@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
+use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
 
 class JabatanSeeder extends Seeder
 {
@@ -20,7 +20,7 @@ class JabatanSeeder extends Seeder
         for ($i = 1; $i <= 15; $i++) {
             $kelasData[] = [
                 'kelas' => $i,
-                'nama_kelas' => 'Kelas ' . $i,
+                'nama_kelas' => 'Kelas '.$i,
                 'basic_tpp' => 1000000 + ($i * 250000), // Dummy basic TPP
                 'created_at' => $now,
                 'updated_at' => $now,
@@ -37,28 +37,38 @@ class JabatanSeeder extends Seeder
             ['nama_jabatan' => 'Kepala Dinas', 'jenis_jabatan' => 'struktural', 'kelas' => 14],
             ['nama_jabatan' => 'Sekretaris Dinas', 'jenis_jabatan' => 'struktural', 'kelas' => 12],
             ['nama_jabatan' => 'Kasubbag Umum dan Kepegawaian', 'jenis_jabatan' => 'struktural', 'kelas' => 9],
-            
+
             // Fungsional - Penata Kelola Penanaman Modal
             ['nama_jabatan' => 'JF Penata Kelola Penanaman Modal Ahli Madya', 'jenis_jabatan' => 'fungsional', 'kelas' => 11],
             ['nama_jabatan' => 'JF Penata Kelola Penanaman Modal Ahli Muda', 'jenis_jabatan' => 'fungsional', 'kelas' => 9],
             ['nama_jabatan' => 'JF Penata Kelola Penanaman Modal Ahli Pertama', 'jenis_jabatan' => 'fungsional', 'kelas' => 8],
-            
+
             // Fungsional - Penata Perizinan
             ['nama_jabatan' => 'JF Penata Perizinan Ahli Madya', 'jenis_jabatan' => 'fungsional', 'kelas' => 11],
             ['nama_jabatan' => 'JF Penata Perizinan Ahli Muda', 'jenis_jabatan' => 'fungsional', 'kelas' => 9],
             ['nama_jabatan' => 'JF Penata Perizinan Ahli Pertama', 'jenis_jabatan' => 'fungsional', 'kelas' => 8],
-            
+
             // Fungsional - Pranata Komputer (Keahlian & Keterampilan)
             ['nama_jabatan' => 'JF Pranata Komputer Ahli Muda', 'jenis_jabatan' => 'fungsional', 'kelas' => 9],
             ['nama_jabatan' => 'JF Pranata Komputer Ahli Pertama', 'jenis_jabatan' => 'fungsional', 'kelas' => 8],
             ['nama_jabatan' => 'JF Pranata Komputer Penyelia', 'jenis_jabatan' => 'fungsional', 'kelas' => 8],
             ['nama_jabatan' => 'JF Pranata Komputer Pelaksana Lanjutan', 'jenis_jabatan' => 'fungsional', 'kelas' => 7],
             ['nama_jabatan' => 'JF Pranata Komputer Pelaksana', 'jenis_jabatan' => 'fungsional', 'kelas' => 6],
-            
+
             // Pelaksana (Fungsional Umum)
             ['nama_jabatan' => 'Penelaah Teknis Kebijakan', 'jenis_jabatan' => 'pelaksana', 'kelas' => 7],
             ['nama_jabatan' => 'Pengolah Data dan Informasi', 'jenis_jabatan' => 'pelaksana', 'kelas' => 6],
             ['nama_jabatan' => 'Pengadministrasi Perkantoran', 'jenis_jabatan' => 'pelaksana', 'kelas' => 5],
+
+            // Jabatan Tambahan Sesuai Master Pegawai
+            ['nama_jabatan' => 'Penata Perizinan Madya', 'jenis_jabatan' => 'fungsional', 'kelas' => 11],
+            ['nama_jabatan' => 'Penata Kelola Penanaman Modal Madya', 'jenis_jabatan' => 'fungsional', 'kelas' => 11],
+            ['nama_jabatan' => 'Penata Perizinan Muda', 'jenis_jabatan' => 'fungsional', 'kelas' => 9],
+            ['nama_jabatan' => 'Sekretaris', 'jenis_jabatan' => 'struktural', 'kelas' => 12],
+            ['nama_jabatan' => 'Penata Kelola Penanaman Modal Ahli Pertama', 'jenis_jabatan' => 'fungsional', 'kelas' => 8],
+            ['nama_jabatan' => 'Calon Penata Perizinan Pertama', 'jenis_jabatan' => 'fungsional', 'kelas' => 8],
+            ['nama_jabatan' => 'Pengelola Penanaman Modal Pertama', 'jenis_jabatan' => 'fungsional', 'kelas' => 8],
+            ['nama_jabatan' => 'Pranata Komputer Pertama', 'jenis_jabatan' => 'fungsional', 'kelas' => 8],
         ];
 
         $insertData = [];

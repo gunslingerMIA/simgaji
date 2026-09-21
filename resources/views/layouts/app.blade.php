@@ -67,8 +67,9 @@
                     icon: 'error',
                     title: 'Gagal!',
                     text: '{{ session('error') }}',
-                    timer: 3000,
-                    showConfirmButton: false
+                    showConfirmButton: true,
+                    confirmButtonText: 'Tutup',
+                    confirmButtonColor: '#dc3545'
                 });
             @endif
         });

@@ -167,6 +167,11 @@
               <div class="alert alert-info py-2">
                   <small><i class="fa-solid fa-circle-info me-1"></i> Pastikan Anda sudah mengunduh dan menggunakan format template terbaru.</small>
               </div>
+              @error('file_excel')
+                  <div class="alert alert-danger py-2 mb-3 small">
+                      <i class="fa-solid fa-circle-exclamation me-1"></i> {{ $message }}
+                  </div>
+              @enderror
               <div class="mb-3">
                   <label class="form-label fw-semibold">File Excel (.xlsx, .xls, .csv)</label>
                   <input type="file" name="file_excel" class="form-control" accept=".xlsx,.xls,.csv" required>
@@ -180,6 +185,93 @@
     </div>
   </div>
 </div>
+
+<!-- Modal Import Errors -->
+@if(session('import_errors') || session('import_general_error'))
+<div class="modal fade" id="importErrorsModal" tabindex="-1" aria-labelledby="importErrorsModalLabel" aria-hidden="true" data-bs-backdrop="static">
+  <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+    <div class="modal-content border-0 shadow-lg">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title fw-bold d-flex align-items-center" id="importErrorsModalLabel">
+          <i class="fa-solid fa-triangle-exclamation me-2"></i> Import Data Excel Gagal
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-4">
+        @if(session('import_general_error'))
+            <div class="alert alert-danger d-flex align-items-center mb-3">
+                <i class="fa-solid fa-circle-xmark fs-4 me-3"></i>
+                <div>
+                    <strong class="d-block">Terjadi Kesalahan:</strong>
+                    <div>{{ session('import_general_error') }}</div>
+                </div>
+            </div>
+        @endif
+
+        @if(session('import_errors'))
+            <div class="alert alert-warning border-0 bg-warning bg-opacity-10 text-dark mb-3">
+                <div class="d-flex align-items-center mb-1">
+                    <i class="fa-solid fa-circle-exclamation text-warning me-2 fs-5"></i>
+                    <strong class="text-danger">Ditemukan {{ count(session('import_errors')) }} kesalahan validasi data</strong>
+                </div>
+                <small class="text-muted">
+                    Seluruh proses import dibatalkan agar database tetap bersih. Silakan periksa daftar baris yang bermasalah pada tabel berikut, perbaiki file Excel Anda, lalu unggah kembali.
+                </small>
+            </div>
+
+            <div class="table-responsive border rounded" style="max-height: 380px;">
+                <table class="table table-hover table-striped align-middle mb-0 text-sm">
+                    <thead class="table-light sticky-top">
+                        <tr>
+                            <th class="text-center" style="width: 100px;">Baris Excel</th>
+                            <th style="width: 190px;">Pegawai / Identitas</th>
+                            <th style="width: 170px;">Kolom Data</th>
+                            <th>Penyebab Masalah</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach(session('import_errors') as $err)
+                        <tr>
+                            <td class="text-center">
+                                <span class="badge bg-danger rounded-pill px-2 py-1">Baris {{ $err['row'] }}</span>
+                            </td>
+                            <td>
+                                <span class="fw-semibold text-dark">{{ $err['identifier'] ?? '-' }}</span>
+                            </td>
+                            <td>
+                                <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25">{{ $err['attribute'] }}</span>
+                            </td>
+                            <td class="text-danger">
+                                <ul class="mb-0 ps-3">
+                                    @foreach($err['errors'] as $msg)
+                                        <li>{{ $msg }}</li>
+                                    @endforeach
+                                </ul>
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        @endif
+      </div>
+      <div class="modal-footer bg-light d-flex justify-content-between">
+        <a href="{{ route('pegawai.template') }}" class="btn btn-outline-success btn-sm">
+          <i class="fa-solid fa-file-excel me-1"></i> Unduh Format Template
+        </a>
+        <div>
+          <button type="button" class="btn btn-secondary btn-sm me-1" data-bs-dismiss="modal">
+            <i class="fa-solid fa-xmark me-1"></i> Tutup
+          </button>
+          <button type="button" class="btn btn-primary btn-sm" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#importModal">
+            <i class="fa-solid fa-arrow-rotate-right me-1"></i> Coba Upload Ulang
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+@endif
 @endsection
 
 @push('scripts')
@@ -301,6 +393,21 @@
                 }
             });
         });
+
+        // Trigger Import Errors Modal or File Input Validation Modal
+        @if(session('import_errors') || session('import_general_error'))
+            const importErrorsModalEl = document.getElementById('importErrorsModal');
+            if (importErrorsModalEl) {
+                const importErrorsModal = new bootstrap.Modal(importErrorsModalEl);
+                importErrorsModal.show();
+            }
+        @elseif($errors->has('file_excel'))
+            const importModalEl = document.getElementById('importModal');
+            if (importModalEl) {
+                const importModal = new bootstrap.Modal(importModalEl);
+                importModal.show();
+            }
+        @endif
     });
 </script>
 @endpush

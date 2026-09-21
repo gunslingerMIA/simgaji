@@ -2,9 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\PegawaiTemplateExport;
+use App\Imports\PegawaiImport;
 use App\Models\Pegawai;
+use App\Models\RefGajiPokokPns;
+use App\Models\RefGajiPokokPppk;
 use App\Models\RefJabatan;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
+use Maatwebsite\Excel\Validators\ValidationException;
 
 class PegawaiController extends Controller
 {
@@ -14,6 +21,7 @@ class PegawaiController extends Controller
     public function index()
     {
         $pegawais = Pegawai::with('jabatan')->orderBy('nama_lengkap', 'asc')->get();
+
         return view('pegawai.index', compact('pegawais'));
     }
 
@@ -23,6 +31,7 @@ class PegawaiController extends Controller
     public function create()
     {
         $jabatans = RefJabatan::orderBy('nama_jabatan', 'asc')->get();
+
         return view('pegawai.create', compact('jabatans'));
     }
 
@@ -65,7 +74,7 @@ class PegawaiController extends Controller
         $pegawai = Pegawai::create($validated);
 
         return redirect()->route('pegawai.show', $pegawai->id)
-                         ->with('success', 'Data Pegawai berhasil ditambahkan. Silakan lengkapi data keluarga.');
+            ->with('success', 'Data Pegawai berhasil ditambahkan. Silakan lengkapi data keluarga.');
     }
 
     /**
@@ -74,59 +83,59 @@ class PegawaiController extends Controller
     public function show(string $id)
     {
         $pegawai = Pegawai::with(['jabatan', 'pasangan', 'anak'])->findOrFail($id);
-        
+
         $gajiPokok = 0;
         if ($pegawai->status_kepegawaian === 'pppk_paruh_waktu') {
             $gajiPokok = $pegawai->gaji_kontrak;
         } else {
             // Hitung MKG
-            $now = \Carbon\Carbon::now();
+            $now = Carbon::now();
             $tmt = $pegawai->tmt_kgb_terakhir ?? $pegawai->tmt_pangkat_terakhir;
-            
+
             $diffInMonths = 0;
             if ($tmt) {
-                $tmtDate = \Carbon\Carbon::parse($tmt);
+                $tmtDate = Carbon::parse($tmt);
                 if ($now->greaterThan($tmtDate)) {
                     $diffInMonths = $tmtDate->diffInMonths($now);
                 }
             }
-    
-            $totalMonths = ((int)$pegawai->mkg_tahun * 12) + (int)$pegawai->mkg_bulan + $diffInMonths;
+
+            $totalMonths = ((int) $pegawai->mkg_tahun * 12) + (int) $pegawai->mkg_bulan + $diffInMonths;
             $currentMkgTahun = floor($totalMonths / 12);
-            
+
             if (in_array($pegawai->status_kepegawaian, ['pns', 'cpns'])) {
-                $refGaji = \App\Models\RefGajiPokokPns::where('golongan', $pegawai->golongan)
+                $refGaji = RefGajiPokokPns::where('golongan', $pegawai->golongan)
                     ->where('mkg', '<=', $currentMkgTahun)
                     ->orderBy('mkg', 'desc')
                     ->first();
-                    
-                if (!$refGaji) {
-                    $refGaji = \App\Models\RefGajiPokokPns::where('golongan', $pegawai->golongan)
+
+                if (! $refGaji) {
+                    $refGaji = RefGajiPokokPns::where('golongan', $pegawai->golongan)
                         ->orderBy('mkg', 'asc')
                         ->first();
                 }
-                
+
                 $gajiPokok = $refGaji ? $refGaji->nominal : 0;
-                
+
                 if ($pegawai->status_kepegawaian === 'cpns') {
                     $gajiPokok = $gajiPokok * 0.8;
                 }
             } elseif ($pegawai->status_kepegawaian === 'pppk') {
-                $refGaji = \App\Models\RefGajiPokokPppk::where('golongan', $pegawai->golongan)
+                $refGaji = RefGajiPokokPppk::where('golongan', $pegawai->golongan)
                     ->where('mkg', '<=', $currentMkgTahun)
                     ->orderBy('mkg', 'desc')
                     ->first();
-                    
-                if (!$refGaji) {
-                    $refGaji = \App\Models\RefGajiPokokPppk::where('golongan', $pegawai->golongan)
+
+                if (! $refGaji) {
+                    $refGaji = RefGajiPokokPppk::where('golongan', $pegawai->golongan)
                         ->orderBy('mkg', 'asc')
                         ->first();
                 }
-                
+
                 $gajiPokok = $refGaji ? $refGaji->nominal : 0;
             }
         }
-        
+
         return view('pegawai.show', compact('pegawai', 'gajiPokok'));
     }
 
@@ -137,6 +146,7 @@ class PegawaiController extends Controller
     {
         $pegawai = Pegawai::findOrFail($id);
         $jabatans = RefJabatan::orderBy('nama_jabatan', 'asc')->get();
+
         return view('pegawai.edit', compact('pegawai', 'jabatans'));
     }
 
@@ -146,9 +156,9 @@ class PegawaiController extends Controller
     public function update(Request $request, string $id)
     {
         $pegawai = Pegawai::findOrFail($id);
-        
+
         $validated = $request->validate([
-            'nip' => 'required|string|max:50|unique:pegawai,nip,' . $id,
+            'nip' => 'required|string|max:50|unique:pegawai,nip,'.$id,
             'gelar_depan' => 'nullable|string|max:50',
             'nama_lengkap' => 'required|string|max:255',
             'gelar_belakang' => 'nullable|string|max:50',
@@ -181,7 +191,7 @@ class PegawaiController extends Controller
         $pegawai->update($validated);
 
         return redirect()->route('pegawai.show', $pegawai->id)
-                         ->with('success', 'Data Pegawai berhasil diperbarui.');
+            ->with('success', 'Data Pegawai berhasil diperbarui.');
     }
 
     /**
@@ -192,6 +202,7 @@ class PegawaiController extends Controller
         $pegawai = Pegawai::findOrFail($id);
         try {
             $pegawai->delete();
+
             return redirect()->route('pegawai.index')->with('success', 'Data Pegawai berhasil dihapus.');
         } catch (\Exception $e) {
             return redirect()->route('pegawai.index')->with('error', 'Gagal menghapus! Pegawai ini mungkin masih terkait dengan data penggajian.');
@@ -203,7 +214,7 @@ class PegawaiController extends Controller
      */
     public function downloadTemplate()
     {
-        return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\PegawaiTemplateExport, 'Template_Import_Pegawai.xlsx');
+        return Excel::download(new PegawaiTemplateExport, 'Template_Import_Pegawai.xlsx');
     }
 
     /**
@@ -212,25 +223,37 @@ class PegawaiController extends Controller
     public function import(Request $request)
     {
         $request->validate([
-            'file_excel' => 'required|mimes:xlsx,xls,csv|max:5120' // max 5MB
+            'file_excel' => 'required|mimes:xlsx,xls,csv|max:5120', // max 5MB
+        ], [
+            'file_excel.required' => 'File Excel wajib dipilih.',
+            'file_excel.mimes' => 'Format file harus berupa .xlsx, .xls, atau .csv.',
+            'file_excel.max' => 'Ukuran file tidak boleh lebih dari 5MB.',
         ]);
 
         try {
-            \Maatwebsite\Excel\Facades\Excel::import(new \App\Imports\PegawaiImport, $request->file('file_excel'));
+            Excel::import(new PegawaiImport, $request->file('file_excel'));
+
             return redirect()->route('pegawai.index')->with('success', 'Data Pegawai berhasil di-import secara massal!');
-        } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
+        } catch (ValidationException $e) {
             $failures = $e->failures();
-            $messages = [];
+            $importErrors = [];
             foreach ($failures as $failure) {
-                $messages[] = 'Baris ' . $failure->row() . ': ' . implode(', ', $failure->errors());
+                $rawRow = $failure->values();
+                $identifier = ! empty($rawRow['nama_lengkap'])
+                    ? $rawRow['nama_lengkap'].(! empty($rawRow['nip']) ? ' ('.$rawRow['nip'].')' : '')
+                    : (! empty($rawRow['nip']) ? 'NIP: '.$rawRow['nip'] : '-');
+
+                $importErrors[] = [
+                    'row' => $failure->row(),
+                    'attribute' => $failure->attribute(),
+                    'errors' => $failure->errors(),
+                    'identifier' => $identifier,
+                ];
             }
-            // we will truncate errors if too long for sweetalert
-            $errorMsg = implode(' | ', array_slice($messages, 0, 5));
-            if(count($messages) > 5) $errorMsg .= '... dan ' . (count($messages) - 5) . ' error lainnya.';
-            
-            return redirect()->route('pegawai.index')->with('error', 'Validasi gagal: ' . $errorMsg);
-        } catch (\Exception $e) {
-            return redirect()->route('pegawai.index')->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+
+            return redirect()->route('pegawai.index')->with('import_errors', $importErrors);
+        } catch (\Throwable $e) {
+            return redirect()->route('pegawai.index')->with('import_general_error', 'Terjadi kesalahan saat memproses data: '.$e->getMessage());
         }
     }
 
@@ -240,20 +263,20 @@ class PegawaiController extends Controller
     public function apiDetail(string $id)
     {
         $pegawai = Pegawai::with(['jabatan', 'pasangan', 'anak'])->findOrFail($id);
-        
-        $now = \Carbon\Carbon::now();
+
+        $now = Carbon::now();
         // Base on TMT KGB if available, else TMT Pangkat
         $tmt = $pegawai->tmt_kgb_terakhir ?? $pegawai->tmt_pangkat_terakhir;
-        
+
         $diffInMonths = 0;
         if ($tmt) {
-            $tmtDate = \Carbon\Carbon::parse($tmt);
+            $tmtDate = Carbon::parse($tmt);
             if ($now->greaterThan($tmtDate)) {
                 $diffInMonths = $tmtDate->diffInMonths($now);
             }
         }
 
-        $totalMonths = ((int)$pegawai->mkg_tahun * 12) + (int)$pegawai->mkg_bulan + $diffInMonths;
+        $totalMonths = ((int) $pegawai->mkg_tahun * 12) + (int) $pegawai->mkg_bulan + $diffInMonths;
         $currentMkgTahun = floor($totalMonths / 12);
         $currentMkgBulan = $totalMonths % 12;
 
@@ -264,34 +287,34 @@ class PegawaiController extends Controller
             $gajiPokok = $pegawai->gaji_kontrak;
         } else {
             if (in_array($pegawai->status_kepegawaian, ['pns', 'cpns'])) {
-                $refGaji = \App\Models\RefGajiPokokPns::where('golongan', $pegawai->golongan)
-                    ->where('mkg', '<=', (int)$currentMkgTahun)
+                $refGaji = RefGajiPokokPns::where('golongan', $pegawai->golongan)
+                    ->where('mkg', '<=', (int) $currentMkgTahun)
                     ->orderBy('mkg', 'desc')
                     ->first();
-                    
-                if (!$refGaji) {
-                    $refGaji = \App\Models\RefGajiPokokPns::where('golongan', $pegawai->golongan)
+
+                if (! $refGaji) {
+                    $refGaji = RefGajiPokokPns::where('golongan', $pegawai->golongan)
                         ->orderBy('mkg', 'asc')
                         ->first();
                 }
-                
+
                 $gajiPokok = $refGaji ? $refGaji->nominal : 0;
-                
+
                 if ($pegawai->status_kepegawaian === 'cpns') {
                     $gajiPokok = $gajiPokok * 0.8;
                 }
             } elseif ($pegawai->status_kepegawaian === 'pppk') {
-                $refGaji = \App\Models\RefGajiPokokPppk::where('golongan', $pegawai->golongan)
-                    ->where('mkg', '<=', (int)$currentMkgTahun)
+                $refGaji = RefGajiPokokPppk::where('golongan', $pegawai->golongan)
+                    ->where('mkg', '<=', (int) $currentMkgTahun)
                     ->orderBy('mkg', 'desc')
                     ->first();
-                    
-                if (!$refGaji) {
-                    $refGaji = \App\Models\RefGajiPokokPppk::where('golongan', $pegawai->golongan)
+
+                if (! $refGaji) {
+                    $refGaji = RefGajiPokokPppk::where('golongan', $pegawai->golongan)
                         ->orderBy('mkg', 'asc')
                         ->first();
                 }
-                
+
                 $gajiPokok = $refGaji ? $refGaji->nominal : 0;
             }
         }
@@ -302,9 +325,9 @@ class PegawaiController extends Controller
                 'tahun' => $currentMkgTahun,
                 'bulan' => $currentMkgBulan,
                 'diff_months' => $diffInMonths,
-                'tmt_acuan' => $tmt ? $tmt->format('d-m-Y') : '-'
+                'tmt_acuan' => $tmt ? $tmt->format('d-m-Y') : '-',
             ],
-            'gaji_pokok' => $gajiPokok
+            'gaji_pokok' => $gajiPokok,
         ]);
     }
 
@@ -314,58 +337,61 @@ class PegawaiController extends Controller
     public function indexKp4()
     {
         $pegawais = Pegawai::where('is_active', true)->get();
+
         return view('cetak_kp4.index', compact('pegawais'));
     }
 
     /**
      * Generate KP4 Document
      */
-    public function cetakKp4(string $id, \Illuminate\Http\Request $request)
+    public function cetakKp4(string $id, Request $request)
     {
         $pegawai = Pegawai::with(['jabatan', 'pasangan', 'anak'])->findOrFail($id);
-        
-        $tanggalKp4 = $request->input('tanggal_kp4') ? \Carbon\Carbon::parse($request->input('tanggal_kp4')) : \Carbon\Carbon::now();
+
+        $tanggalKp4 = $request->input('tanggal_kp4') ? Carbon::parse($request->input('tanggal_kp4')) : Carbon::now();
         $now = $tanggalKp4;
-        
+
         $tmt = $pegawai->tmt_kgb_terakhir ?? $pegawai->tmt_pangkat_terakhir;
-        
+
         $diffInMonths = 0;
         if ($tmt) {
-            $tmtDate = \Carbon\Carbon::parse($tmt);
+            $tmtDate = Carbon::parse($tmt);
             if ($now->greaterThan($tmtDate)) {
                 $diffInMonths = $tmtDate->diffInMonths($now);
             }
         }
 
-        $totalMonths = ((int)$pegawai->mkg_tahun * 12) + (int)$pegawai->mkg_bulan + $diffInMonths;
+        $totalMonths = ((int) $pegawai->mkg_tahun * 12) + (int) $pegawai->mkg_bulan + $diffInMonths;
         $currentMkgTahun = floor($totalMonths / 12);
-        
+
         $mkgTambahanTahun = floor($diffInMonths / 12);
         $mkgTambahanBulan = $diffInMonths % 12;
-        
+
         $mkgSeluruhnyaTahun = floor($totalMonths / 12);
         $mkgSeluruhnyaBulan = $totalMonths % 12;
-        
+
         $gajiPokok = 0;
         if (in_array($pegawai->status_kepegawaian, ['pns', 'cpns'])) {
-            $refGaji = \App\Models\RefGajiPokokPns::where('golongan', $pegawai->golongan)
-                ->where('mkg', '<=', (int)$currentMkgTahun)
+            $refGaji = RefGajiPokokPns::where('golongan', $pegawai->golongan)
+                ->where('mkg', '<=', (int) $currentMkgTahun)
                 ->orderBy('mkg', 'desc')
                 ->first();
-            if (!$refGaji) {
-                $refGaji = \App\Models\RefGajiPokokPns::where('golongan', $pegawai->golongan)
+            if (! $refGaji) {
+                $refGaji = RefGajiPokokPns::where('golongan', $pegawai->golongan)
                     ->orderBy('mkg', 'asc')
                     ->first();
             }
             $gajiPokok = $refGaji ? $refGaji->nominal : 0;
-            if ($pegawai->status_kepegawaian === 'cpns') $gajiPokok = $gajiPokok * 0.8;
+            if ($pegawai->status_kepegawaian === 'cpns') {
+                $gajiPokok = $gajiPokok * 0.8;
+            }
         } elseif ($pegawai->status_kepegawaian === 'pppk') {
-            $refGaji = \App\Models\RefGajiPokokPppk::where('golongan', $pegawai->golongan)
-                ->where('mkg', '<=', (int)$currentMkgTahun)
+            $refGaji = RefGajiPokokPppk::where('golongan', $pegawai->golongan)
+                ->where('mkg', '<=', (int) $currentMkgTahun)
                 ->orderBy('mkg', 'desc')
                 ->first();
-            if (!$refGaji) {
-                $refGaji = \App\Models\RefGajiPokokPppk::where('golongan', $pegawai->golongan)
+            if (! $refGaji) {
+                $refGaji = RefGajiPokokPppk::where('golongan', $pegawai->golongan)
                     ->orderBy('mkg', 'asc')
                     ->first();
             }
@@ -377,7 +403,7 @@ class PegawaiController extends Controller
         $unitKerja = 'Dinas Penanaman Modal dan Pelayanan Terpadu Satu Pintu Kota Pekalongan';
 
         return view('pegawai.kp4', compact(
-            'pegawai', 'gajiPokok', 'currentMkgTahun', 'unitKerja', 
+            'pegawai', 'gajiPokok', 'currentMkgTahun', 'unitKerja',
             'mkgTambahanTahun', 'mkgTambahanBulan', 'mkgSeluruhnyaTahun', 'mkgSeluruhnyaBulan',
             'tanggalKp4'
         ));
