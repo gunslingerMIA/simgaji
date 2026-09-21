@@ -29,6 +29,17 @@
             
             <!-- Tab PNS -->
             <div class="tab-pane fade show active" id="pns" role="tabpanel" aria-labelledby="pns-tab">
+                <div class="d-flex justify-content-between align-items-center mb-3 mt-2">
+                    <h6 class="mb-0 fw-bold">Data Gaji Pokok PNS</h6>
+                    <div>
+                        <a href="{{ route('referensi-gaji.template.pns') }}" class="btn btn-sm btn-outline-success">
+                            <i class="fa-solid fa-file-excel"></i> Download Template
+                        </a>
+                        <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#importPnsModal">
+                            <i class="fa-solid fa-upload"></i> Import Excel
+                        </button>
+                    </div>
+                </div>
                 <div class="table-responsive">
                     <table class="table table-hover align-middle w-100 dataTable" id="tablePns">
                         <thead class="table-light">
@@ -64,6 +75,17 @@
 
             <!-- Tab PPPK -->
             <div class="tab-pane fade" id="pppk" role="tabpanel" aria-labelledby="pppk-tab">
+                <div class="d-flex justify-content-between align-items-center mb-3 mt-2">
+                    <h6 class="mb-0 fw-bold">Data Gaji Pokok PPPK</h6>
+                    <div>
+                        <a href="{{ route('referensi-gaji.template.pppk') }}" class="btn btn-sm btn-outline-success">
+                            <i class="fa-solid fa-file-excel"></i> Download Template
+                        </a>
+                        <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#importPppkModal">
+                            <i class="fa-solid fa-upload"></i> Import Excel
+                        </button>
+                    </div>
+                </div>
                 <div class="table-responsive">
                     <table class="table table-hover align-middle w-100 dataTable" id="tablePppk">
                         <thead class="table-light">
@@ -99,6 +121,56 @@
 
         </div>
     </div>
+</div>
+
+<!-- Modal Import PNS -->
+<div class="modal fade" id="importPnsModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow">
+      <div class="modal-header border-bottom-0 pb-0">
+        <h5 class="modal-title fw-bold">Import Gaji Pokok PNS</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form action="{{ route('referensi-gaji.import.pns') }}" method="POST" enctype="multipart/form-data">
+          @csrf
+          <div class="modal-body">
+              <div class="mb-3">
+                  <label class="form-label fw-semibold">File Excel (.xlsx, .xls, .csv)</label>
+                  <input type="file" name="file" class="form-control" accept=".xlsx, .xls, .csv" required>
+              </div>
+          </div>
+          <div class="modal-footer border-top-0 pt-0">
+            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
+            <button type="submit" class="btn btn-primary"><i class="fa-solid fa-upload me-1"></i> Import Data</button>
+          </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Import PPPK -->
+<div class="modal fade" id="importPppkModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow">
+      <div class="modal-header border-bottom-0 pb-0">
+        <h5 class="modal-title fw-bold">Import Gaji Pokok PPPK</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form action="{{ route('referensi-gaji.import.pppk') }}" method="POST" enctype="multipart/form-data">
+          @csrf
+          <div class="modal-body">
+              <div class="mb-3">
+                  <label class="form-label fw-semibold">File Excel (.xlsx, .xls, .csv)</label>
+                  <input type="file" name="file" class="form-control" accept=".xlsx, .xls, .csv" required>
+              </div>
+          </div>
+          <div class="modal-footer border-top-0 pt-0">
+            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
+            <button type="submit" class="btn btn-primary"><i class="fa-solid fa-upload me-1"></i> Import Data</button>
+          </div>
+      </form>
+    </div>
+  </div>
 </div>
 
 <!-- Modal Edit Nominal -->

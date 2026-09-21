@@ -31,6 +31,12 @@
                 Referensi Gaji
             </a>
         </li>
+        <li class="nav-item">
+            <a href="{{ route('pagu-anggaran.index') }}" class="nav-link {{ request()->is('pagu-anggaran*') ? 'active' : '' }}">
+                <i class="fa-solid fa-sack-dollar"></i>
+                Pagu Anggaran
+            </a>
+        </li>
 
         <div class="menu-header">Payroll Proses</div>
         <li class="nav-item">

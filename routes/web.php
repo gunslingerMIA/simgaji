@@ -27,6 +27,13 @@ Route::delete('anak/{id}', [PegawaiAnakController::class, 'destroy'])->name('peg
 
 Route::get('referensi-gaji', [RefGajiController::class, 'index'])->name('referensi-gaji.index');
 Route::put('referensi-gaji/pns/{id}', [RefGajiController::class, 'updatePns'])->name('referensi-gaji.update.pns');
+Route::put('referensi-gaji/pppk/{id}', [RefGajiController::class, 'updatePppk'])->name('referensi-gaji.update.pppk');
+Route::get('referensi-gaji/template/pns', [RefGajiController::class, 'templatePns'])->name('referensi-gaji.template.pns');
+Route::get('referensi-gaji/template/pppk', [RefGajiController::class, 'templatePppk'])->name('referensi-gaji.template.pppk');
+Route::post('referensi-gaji/import/pns', [RefGajiController::class, 'importPns'])->name('referensi-gaji.import.pns');
+Route::post('referensi-gaji/import/pppk', [RefGajiController::class, 'importPppk'])->name('referensi-gaji.import.pppk');
 
 Route::resource('jabatan', JabatanController::class)->except(['create', 'show', 'edit']);
 Route::put('jabatan/kelas/{id}', [JabatanController::class, 'updateKelas'])->name('jabatan.kelas.update');
+
+Route::resource('pagu-anggaran', \App\Http\Controllers\PaguAnggaranController::class)->except(['create', 'show']);
