@@ -49,7 +49,23 @@
                 <div class="text-start small">
                     <div class="mb-2">
                         <div class="text-muted fw-semibold">Jabatan</div>
-                        <div>{{ $pegawai->jabatan ? $pegawai->jabatan->nama_jabatan : '-' }}</div>
+                        <div class="fw-semibold text-dark">{{ $pegawai->jabatan ? $pegawai->jabatan->nama_jabatan : '-' }}</div>
+                        <div class="d-flex flex-wrap gap-1 mt-1">
+                            @if($pegawai->jabatan && $pegawai->jabatan->kelasJabatan)
+                                <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25" style="font-size: 0.75rem;">
+                                    Kelas {{ $pegawai->jabatan->kelasJabatan->kelas }}
+                                </span>
+                            @endif
+                            @if($pegawai->is_penyetaraan)
+                                <span class="badge bg-warning bg-opacity-25 text-dark border border-warning" style="font-size: 0.75rem;">
+                                    <i class="fa-solid fa-arrows-split-up-and-left me-1"></i>Penyetaraan
+                                </span>
+                            @endif
+                        </div>
+                    </div>
+                    <div class="mb-2">
+                        <div class="text-muted fw-semibold">Tambahan Penghasilan (TPP)</div>
+                        <div class="fw-bold text-primary">Rp {{ number_format($pegawai->getTppNominal(), 0, ',', '.') }}</div>
                     </div>
                     <div class="mb-2">
                         <div class="text-muted fw-semibold">Masa Kerja Golongan (MKG) &amp; Gaji Pokok</div>

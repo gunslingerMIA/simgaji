@@ -9,6 +9,7 @@ use App\Models\RefGajiPokokPns;
 use App\Models\RefGajiPokokPppk;
 use App\Models\RefJabatan;
 use Carbon\Carbon;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 use Maatwebsite\Excel\Validators\ValidationException;
@@ -20,7 +21,13 @@ class PegawaiController extends Controller
      */
     public function index()
     {
-        $pegawais = Pegawai::with('jabatan')->orderBy('nama_lengkap', 'asc')->get();
+        $pegawais = Pegawai::with(['jabatan.kelasJabatan'])
+            ->select('pegawai.*')
+            ->leftJoin('ref_jabatan', 'pegawai.ref_jabatan_id', '=', 'ref_jabatan.id')
+            ->leftJoin('ref_kelas_jabatan', 'ref_jabatan.ref_kelas_jabatan_id', '=', 'ref_kelas_jabatan.id')
+            ->orderByRaw('CASE WHEN ref_kelas_jabatan.kelas IS NULL THEN 1 ELSE 0 END, ref_kelas_jabatan.kelas DESC')
+            ->orderBy('pegawai.nama_lengkap', 'asc')
+            ->get();
 
         return view('pegawai.index', compact('pegawais'));
     }
@@ -58,6 +65,7 @@ class PegawaiController extends Controller
             'mkg_bulan' => 'nullable|integer',
             'gaji_kontrak' => 'nullable|numeric|min:0',
             'ref_jabatan_id' => 'required|exists:ref_jabatan,id',
+            'is_penyetaraan' => 'nullable|boolean',
             'tmt_cpns' => 'nullable|date',
             'tmt_pns' => 'nullable|date',
             'tmt_pangkat_terakhir' => 'nullable|date',
@@ -69,6 +77,7 @@ class PegawaiController extends Controller
         ]);
 
         $validated['is_active'] = $request->has('is_active');
+        $validated['is_penyetaraan'] = $request->boolean('is_penyetaraan');
         $validated['npwp'] = $validated['nik'];
 
         $pegawai = Pegawai::create($validated);
@@ -175,6 +184,7 @@ class PegawaiController extends Controller
             'mkg_bulan' => 'nullable|integer',
             'gaji_kontrak' => 'nullable|numeric|min:0',
             'ref_jabatan_id' => 'required|exists:ref_jabatan,id',
+            'is_penyetaraan' => 'nullable|boolean',
             'tmt_cpns' => 'nullable|date',
             'tmt_pns' => 'nullable|date',
             'tmt_pangkat_terakhir' => 'nullable|date',
@@ -186,6 +196,7 @@ class PegawaiController extends Controller
         ]);
 
         $validated['is_active'] = $request->has('is_active');
+        $validated['is_penyetaraan'] = $request->boolean('is_penyetaraan');
         $validated['npwp'] = $validated['nik'];
 
         $pegawai->update($validated);
@@ -252,8 +263,23 @@ class PegawaiController extends Controller
             }
 
             return redirect()->route('pegawai.index')->with('import_errors', $importErrors);
+        } catch (QueryException $e) {
+            $msg = $e->getMessage();
+            if ($e->getCode() == '22001' || str_contains($msg, 'Data too long')) {
+                preg_match("/column '([^']+)'/", $msg, $matches);
+                $col = $matches[1] ?? 'tertentu';
+                $friendlyMsg = "Gagal menyimpan data karena panjang teks pada kolom '{$col}' melebihi batas yang diizinkan database (misal NIK lebih dari 16 karakter). Pastikan tidak ada spasi atau karakter berlebih.";
+            } elseif ($e->getCode() == '23000' || str_contains($msg, 'Duplicate entry')) {
+                preg_match("/Duplicate entry '([^']+)' for key/", $msg, $matches);
+                $entry = $matches[1] ?? '';
+                $friendlyMsg = "Data '{$entry}' sudah terdaftar di sistem. Terjadi duplikasi data unik (seperti NIP) pada file yang diunggah.";
+            } else {
+                $friendlyMsg = 'Gagal menyimpan data karena format nilai pada file tidak sesuai dengan struktur database. Mohon cek kembali data yang diinput.';
+            }
+
+            return redirect()->route('pegawai.index')->with('import_general_error', $friendlyMsg);
         } catch (\Throwable $e) {
-            return redirect()->route('pegawai.index')->with('import_general_error', 'Terjadi kesalahan saat memproses data: '.$e->getMessage());
+            return redirect()->route('pegawai.index')->with('import_general_error', 'Gagal memproses file: '.$e->getMessage());
         }
     }
 
@@ -328,6 +354,7 @@ class PegawaiController extends Controller
                 'tmt_acuan' => $tmt ? $tmt->format('d-m-Y') : '-',
             ],
             'gaji_pokok' => $gajiPokok,
+            'tpp_nominal' => $pegawai->getTppNominal(),
         ]);
     }
 

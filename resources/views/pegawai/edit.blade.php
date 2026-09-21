@@ -139,6 +139,15 @@
                     </select>
                     @error('ref_jabatan_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
                 </div>
+                <div class="col-md-6 d-flex align-items-center">
+                    <div class="form-check form-switch mt-3">
+                        <input class="form-check-input" type="checkbox" name="is_penyetaraan" id="isPenyetaraan" value="1" {{ old('is_penyetaraan', $pegawai->is_penyetaraan) ? 'checked' : '' }}>
+                        <label class="form-check-label fw-semibold" for="isPenyetaraan">
+                            Pegawai Hasil Penyetaraan Jabatan (Eks-Struktural)
+                        </label>
+                        <div class="text-muted small">Centang jika PNS merupakan hasil penyetaraan struktural (TPP disetarakan mantan jabatannya).</div>
+                    </div>
+                </div>
                 <div class="col-md-3" id="tmtCpnsField">
                     <label class="form-label fw-semibold">TMT CPNS</label>
                     <input type="date" name="tmt_cpns" class="form-control" value="{{ old('tmt_cpns', $pegawai->tmt_cpns?->format('Y-m-d')) }}">

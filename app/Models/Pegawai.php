@@ -28,6 +28,7 @@ class Pegawai extends Model
         'mkg_tahun',
         'mkg_bulan',
         'ref_jabatan_id',
+        'is_penyetaraan',
         'tmt_cpns',
         'tmt_pns',
         'tmt_pangkat_terakhir',
@@ -41,13 +42,23 @@ class Pegawai extends Model
     ];
 
     protected $casts = [
-        'tmt_cpns'             => 'date',
-        'tmt_pns'              => 'date',
+        'tmt_cpns' => 'date',
+        'tmt_pns' => 'date',
         'tmt_pangkat_terakhir' => 'date',
-        'tmt_kgb_terakhir'     => 'date',
-        'tanggal_lahir'        => 'date',
-        'is_active'            => 'boolean',
+        'tmt_kgb_terakhir' => 'date',
+        'tanggal_lahir' => 'date',
+        'is_active' => 'boolean',
+        'is_penyetaraan' => 'boolean',
     ];
+
+    public function getTppNominal(): float
+    {
+        if (! $this->jabatan) {
+            return 0.0;
+        }
+
+        return $this->jabatan->getTppByStatus($this->status_kepegawaian, (bool) $this->is_penyetaraan);
+    }
 
     public function jabatan(): BelongsTo
     {

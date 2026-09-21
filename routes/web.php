@@ -1,9 +1,11 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\JabatanController;
+use App\Http\Controllers\PegawaiAnakController;
 use App\Http\Controllers\PegawaiController;
 use App\Http\Controllers\PegawaiPasanganController;
-use App\Http\Controllers\PegawaiAnakController;
+use App\Http\Controllers\RefGajiController;
+use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('dashboard');
@@ -23,5 +25,8 @@ Route::post('pegawai/{id}/anak', [PegawaiAnakController::class, 'store'])->name(
 Route::put('pegawai/{id}/anak/{anak_id}', [PegawaiAnakController::class, 'update'])->name('pegawai.anak.update');
 Route::delete('anak/{id}', [PegawaiAnakController::class, 'destroy'])->name('pegawai.anak.destroy');
 
-Route::get('referensi-gaji', [\App\Http\Controllers\RefGajiController::class, 'index'])->name('referensi-gaji.index');
-Route::put('referensi-gaji/pns/{id}', [\App\Http\Controllers\RefGajiController::class, 'updatePns'])->name('referensi-gaji.update.pns');
+Route::get('referensi-gaji', [RefGajiController::class, 'index'])->name('referensi-gaji.index');
+Route::put('referensi-gaji/pns/{id}', [RefGajiController::class, 'updatePns'])->name('referensi-gaji.update.pns');
+
+Route::resource('jabatan', JabatanController::class)->except(['create', 'show', 'edit']);
+Route::put('jabatan/kelas/{id}', [JabatanController::class, 'updateKelas'])->name('jabatan.kelas.update');

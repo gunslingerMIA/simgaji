@@ -20,7 +20,7 @@
             </a>
         </li>
         <li class="nav-item">
-            <a href="#" class="nav-link">
+            <a href="{{ route('jabatan.index') }}" class="nav-link {{ request()->is('jabatan*') ? 'active' : '' }}">
                 <i class="fa-solid fa-sitemap"></i>
                 Jabatan & Kelas
             </a>

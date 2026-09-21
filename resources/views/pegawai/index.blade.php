@@ -53,7 +53,21 @@
                             <div><span class="badge bg-secondary">{{ strtoupper(str_replace('_', ' ', $pegawai->status_kepegawaian)) }}</span></div>
                             <div class="small mt-1">Gol. {{ $pegawai->status_kepegawaian === 'pppk_paruh_waktu' ? '-' : $pegawai->golongan }}</div>
                         </td>
-                        <td>{{ $pegawai->jabatan ? $pegawai->jabatan->nama_jabatan : '-' }}</td>
+                        <td>
+                            <div class="fw-semibold text-dark">{{ $pegawai->jabatan ? $pegawai->jabatan->nama_jabatan : '-' }}</div>
+                            <div class="d-flex flex-wrap gap-1 mt-1">
+                                @if($pegawai->jabatan && $pegawai->jabatan->kelasJabatan)
+                                    <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25" style="font-size: 0.72rem;">
+                                        Kelas {{ $pegawai->jabatan->kelasJabatan->kelas }}
+                                    </span>
+                                @endif
+                                @if($pegawai->is_penyetaraan)
+                                    <span class="badge bg-warning bg-opacity-25 text-dark border border-warning" style="font-size: 0.72rem;">
+                                        <i class="fa-solid fa-arrows-split-up-and-left me-1"></i>Penyetaraan
+                                    </span>
+                                @endif
+                            </div>
+                        </td>
                         <td>
                             <div>{{ $pegawai->nomor_rekening }}</div>
                             <div class="small text-muted">{{ $pegawai->nama_pada_rekening }} ({{ $pegawai->nama_bank ?? 'Bank Jateng' }})</div>
@@ -124,6 +138,10 @@
                           <div class="d-flex justify-content-between align-items-center mt-2" id="previewGajiPokokContainer" style="display: none;">
                               <span class="fw-bold">Gaji Pokok (Est)</span>
                               <span class="badge bg-success fs-6" id="previewGajiPokok"></span>
+                          </div>
+                          <div class="d-flex justify-content-between align-items-center mt-2" id="previewTppContainer">
+                              <span class="fw-bold">TPP (Est)</span>
+                              <span class="badge bg-info fs-6 text-dark" id="previewTpp"></span>
                           </div>
                       </div>
                   </div>
@@ -199,11 +217,11 @@
       </div>
       <div class="modal-body p-4">
         @if(session('import_general_error'))
-            <div class="alert alert-danger d-flex align-items-center mb-3">
-                <i class="fa-solid fa-circle-xmark fs-4 me-3"></i>
+            <div class="alert alert-danger d-flex align-items-start mb-3 border-0 bg-danger bg-opacity-10 text-danger">
+                <i class="fa-solid fa-circle-xmark fs-4 me-3 mt-1 text-danger"></i>
                 <div>
-                    <strong class="d-block">Terjadi Kesalahan:</strong>
-                    <div>{{ session('import_general_error') }}</div>
+                    <strong class="d-block mb-1 text-danger">Terjadi Kendala Penyimpanan Data:</strong>
+                    <div class="text-dark small">{{ session('import_general_error') }}</div>
                 </div>
             </div>
         @endif
@@ -284,7 +302,8 @@
             language: {
                 url: 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/id.json',
             },
-            responsive: true
+            responsive: true,
+            order: []
         });
 
         // SweetAlert Delete Confirmation
@@ -339,7 +358,8 @@
                     let statusLabel = p.status_kepegawaian.replace('_', ' ').toUpperCase();
                     let golLabel = p.status_kepegawaian === 'pppk_paruh_waktu' ? '-' : p.golongan;
                     $('#previewStatusGol').html('<span class="badge bg-secondary">' + statusLabel + '</span> Gol. ' + golLabel);
-                    $('#previewJabatan').text(p.jabatan ? p.jabatan.nama_jabatan : '-');
+                    let penyetaraanBadge = p.is_penyetaraan ? ' <span class="badge bg-warning bg-opacity-25 text-dark border border-warning" style="font-size: 0.7rem;">Penyetaraan</span>' : '';
+                    $('#previewJabatan').html((p.jabatan ? p.jabatan.nama_jabatan : '-') + penyetaraanBadge);
                     
                     // MKG Data
                     $('#previewTmtAcuan').text(m.tmt_acuan);
@@ -356,6 +376,10 @@
                         $('#previewGajiPokok').text('Rp ' + gajiPokok);
                         $('#previewGajiPokokContainer').show();
                     }
+
+                    // TPP
+                    let tpp = res.tpp_nominal ? new Intl.NumberFormat('id-ID').format(res.tpp_nominal) : '0';
+                    $('#previewTpp').text('Rp ' + tpp);
 
                     // Pasangan
                     let pasanganHtml = '';
