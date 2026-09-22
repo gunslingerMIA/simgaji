@@ -151,6 +151,7 @@
                                             data-nama="{{ $j->nama_jabatan }}"
                                             data-jenis="{{ $j->jenis_jabatan }}"
                                             data-kelas="{{ $j->ref_kelas_jabatan_id }}"
+                                            data-tunjangan_resmi="{{ $j->tunjangan_resmi }}"
                                             data-tpp_pns="{{ $j->tpp_pns }}"
                                             data-tpp_penyetaraan="{{ $j->tpp_penyetaraan }}"
                                             data-tpp_pppk="{{ $j->tpp_pppk ?? 250000 }}"
@@ -266,6 +267,11 @@
                         </div>
                     </div>
 
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Tunjangan Jabatan/Fungsional/Umum Resmi (Rp)</label>
+                        <input type="number" name="tunjangan_resmi" class="form-control" placeholder="Contoh: 185000">
+                    </div>
+
                     <div class="card bg-light border-0 p-3 mb-2">
                         <h6 class="fw-bold mb-2 text-secondary"><i class="fa-solid fa-money-bill-wave me-1"></i> Penyesuaian Nilai TPP</h6>
                         <div class="row">
@@ -337,6 +343,11 @@
                                 @endforeach
                             </select>
                         </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Tunjangan Jabatan/Fungsional/Umum Resmi (Rp)</label>
+                        <input type="number" name="tunjangan_resmi" id="edit_tunjangan_resmi" class="form-control" placeholder="Contoh: 185000">
                     </div>
 
                     <div class="card bg-light border-0 p-3 mb-2">
@@ -456,6 +467,7 @@
             const nama = $(this).data('nama');
             const jenis = $(this).data('jenis');
             const kelas = $(this).data('kelas');
+            const tunjanganResmi = $(this).data('tunjangan_resmi');
             const tppPns = $(this).data('tpp_pns');
             const tppPenyetaraan = $(this).data('tpp_penyetaraan');
             const tppPppk = $(this).data('tpp_pppk');
@@ -464,6 +476,7 @@
             $('#edit_nama_jabatan').val(nama);
             $('#edit_jenis_jabatan').val(jenis);
             $('#edit_ref_kelas_jabatan_id').val(kelas);
+            $('#edit_tunjangan_resmi').val(tunjanganResmi);
             $('#edit_tpp_pns').val(tppPns !== '' && tppPns !== null ? tppPns : '');
             $('#edit_tpp_penyetaraan').val(tppPenyetaraan !== '' && tppPenyetaraan !== null ? tppPenyetaraan : '');
             $('#edit_tpp_pppk').val(tppPppk);

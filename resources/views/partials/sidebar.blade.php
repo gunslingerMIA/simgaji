@@ -40,10 +40,30 @@
 
         <div class="menu-header">Payroll Proses</div>
         <li class="nav-item">
-            <a href="#" class="nav-link">
+            <a href="#gajiIndukCollapse" data-bs-toggle="collapse" class="nav-link {{ request()->is('gaji-induk*') ? 'active' : '' }}" aria-expanded="{{ request()->is('gaji-induk*') ? 'true' : 'false' }}">
                 <i class="fa-solid fa-money-check-dollar"></i>
                 Gaji Induk Bulanan
+                <i class="fa-solid fa-chevron-down ms-auto" style="font-size: 0.8em; margin-top: 5px;"></i>
             </a>
+            <div class="collapse {{ request()->is('gaji-induk*') ? 'show' : '' }}" id="gajiIndukCollapse">
+                <ul class="nav flex-column ms-3">
+                    <li class="nav-item">
+                        <a href="{{ route('gaji-induk-pns.index') }}" class="nav-link {{ request()->is('gaji-induk-pns*') ? 'active' : '' }}" style="font-size: 0.9em;">
+                            <i class="fa-solid fa-circle-dot" style="font-size: 0.5em; margin-right: 8px;"></i> Gaji PNS
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ route('gaji-induk-pppk.index') }}" class="nav-link {{ request()->is('gaji-induk-pppk*') ? 'active' : '' }}" style="font-size: 0.9em;">
+                            <i class="fa-solid fa-circle-dot" style="font-size: 0.5em; margin-right: 8px;"></i> Gaji PPPK
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ route('gaji-induk-pppk-paruh-waktu.index') }}" class="nav-link {{ request()->is('gaji-induk-pppk-paruh-waktu*') ? 'active' : '' }}" style="font-size: 0.9em;">
+                            <i class="fa-solid fa-circle-dot" style="font-size: 0.5em; margin-right: 8px;"></i> PPPK Paruh Waktu
+                        </a>
+                    </li>
+                </ul>
+            </div>
         </li>
         <li class="nav-item">
             <a href="#" class="nav-link">
@@ -84,7 +104,7 @@
             </a>
         </li>
         <li class="nav-item mt-3">
-            <a href="#" class="nav-link text-warning border border-warning border-opacity-25 bg-warning bg-opacity-10">
+            <a href="{{ route('early-warning.index') }}" class="nav-link text-warning border border-warning border-opacity-25 bg-warning bg-opacity-10 {{ request()->is('early-warning*') ? 'active text-white bg-warning bg-opacity-100' : '' }}">
                 <i class="fa-solid fa-bell"></i>
                 Early Warning System
             </a>

@@ -25,6 +25,40 @@
             <a href="{{ route('pegawai.create') }}" class="btn btn-primary btn-sm"><i class="fa-solid fa-plus me-1"></i> Tambah Pegawai</a>
         </div>
     </div>
+    <div class="card-body border-bottom bg-light">
+        <form action="{{ route('pegawai.index') }}" method="GET" class="row g-3 align-items-end">
+            <div class="col-md-3">
+                <label for="status_kepegawaian" class="form-label small fw-bold">Jenis Kepegawaian</label>
+                <select name="status_kepegawaian" id="status_kepegawaian" class="form-select form-select-sm">
+                    <option value="">-- Semua Jenis --</option>
+                    <option value="pns" {{ request('status_kepegawaian') == 'pns' ? 'selected' : '' }}>PNS</option>
+                    <option value="cpns" {{ request('status_kepegawaian') == 'cpns' ? 'selected' : '' }}>CPNS</option>
+                    <option value="pppk" {{ request('status_kepegawaian') == 'pppk' ? 'selected' : '' }}>PPPK</option>
+                    <option value="pppk_paruh_waktu" {{ request('status_kepegawaian') == 'pppk_paruh_waktu' ? 'selected' : '' }}>PPPK Paruh Waktu</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="is_active" class="form-label small fw-bold">Status Aktif</label>
+                <select name="is_active" id="is_active" class="form-select form-select-sm">
+                    <option value="">-- Semua Status --</option>
+                    <option value="1" {{ request('is_active') == '1' ? 'selected' : '' }}>Aktif</option>
+                    <option value="0" {{ request('is_active') == '0' ? 'selected' : '' }}>Non-Aktif</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label for="ref_jabatan_id" class="form-label small fw-bold">Jabatan</label>
+                <select name="ref_jabatan_id" id="ref_jabatan_id" class="form-select form-select-sm">
+                    <option value="">-- Semua Jabatan --</option>
+                    @foreach($jabatans as $jab)
+                        <option value="{{ $jab->id }}" {{ request('ref_jabatan_id') == $jab->id ? 'selected' : '' }}>{{ $jab->nama_jabatan }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary btn-sm w-100"><i class="fa-solid fa-filter me-1"></i> Filter</button>
+            </div>
+        </form>
+    </div>
     <div class="card-body">
         <div class="table-responsive">
             <table class="table table-hover align-middle w-100" id="pegawaiTable">
@@ -361,25 +395,29 @@
                     let penyetaraanBadge = p.is_penyetaraan ? ' <span class="badge bg-warning bg-opacity-25 text-dark border border-warning" style="font-size: 0.7rem;">Penyetaraan</span>' : '';
                     $('#previewJabatan').html((p.jabatan ? p.jabatan.nama_jabatan : '-') + penyetaraanBadge);
                     
-                    // MKG Data
-                    $('#previewTmtAcuan').text(m.tmt_acuan);
+                    // MKG & TPP Data
                     if (p.status_kepegawaian === 'pppk_paruh_waktu') {
-                        let gaji = p.gaji_kontrak ? new Intl.NumberFormat('id-ID').format(p.gaji_kontrak) : '0';
-                        $('#previewMkgMaster').html('<span class="text-success">Rp ' + gaji + '</span> (Sesuai Kontrak)');
+                        $('#previewTmtAcuan').text('-');
+                        $('#previewMkgMaster').text('-');
                         $('#previewMkgCurrent').text('-');
-                        $('#previewGajiPokokContainer').hide();
+                        
+                        let gaji = p.gaji_kontrak ? new Intl.NumberFormat('id-ID').format(p.gaji_kontrak) : '0';
+                        $('#previewGajiPokok').html('<span class="fw-bold">Rp ' + gaji + '</span> (Sesuai Kontrak)');
+                        $('#previewGajiPokokContainer').show();
+                        
+                        $('#previewTpp').text('-');
                     } else {
+                        $('#previewTmtAcuan').text(m.tmt_acuan);
                         $('#previewMkgMaster').text(p.mkg_tahun + ' Tahun ' + p.mkg_bulan + ' Bulan');
                         $('#previewMkgCurrent').text(m.tahun + ' Tahun ' + m.bulan + ' Bulan');
                         
                         let gajiPokok = res.gaji_pokok ? new Intl.NumberFormat('id-ID').format(res.gaji_pokok) : '0';
                         $('#previewGajiPokok').text('Rp ' + gajiPokok);
                         $('#previewGajiPokokContainer').show();
-                    }
 
-                    // TPP
-                    let tpp = res.tpp_nominal ? new Intl.NumberFormat('id-ID').format(res.tpp_nominal) : '0';
-                    $('#previewTpp').text('Rp ' + tpp);
+                        let tpp = res.tpp_nominal ? new Intl.NumberFormat('id-ID').format(res.tpp_nominal) : '0';
+                        $('#previewTpp').text('Rp ' + tpp);
+                    }
 
                     // Pasangan
                     let pasanganHtml = '';

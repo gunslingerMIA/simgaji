@@ -19,17 +19,31 @@ class PegawaiController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $pegawais = Pegawai::with(['jabatan.kelasJabatan'])
+        $query = Pegawai::with(['jabatan.kelasJabatan'])
             ->select('pegawai.*')
             ->leftJoin('ref_jabatan', 'pegawai.ref_jabatan_id', '=', 'ref_jabatan.id')
-            ->leftJoin('ref_kelas_jabatan', 'ref_jabatan.ref_kelas_jabatan_id', '=', 'ref_kelas_jabatan.id')
+            ->leftJoin('ref_kelas_jabatan', 'ref_jabatan.ref_kelas_jabatan_id', '=', 'ref_kelas_jabatan.id');
+
+        if ($request->filled('status_kepegawaian')) {
+            $query->where('pegawai.status_kepegawaian', $request->status_kepegawaian);
+        }
+        if ($request->filled('is_active')) {
+            $query->where('pegawai.is_active', $request->is_active);
+        }
+        if ($request->filled('ref_jabatan_id')) {
+            $query->where('pegawai.ref_jabatan_id', $request->ref_jabatan_id);
+        }
+
+        $pegawais = $query->orderBy('pegawai.is_active', 'desc')
             ->orderByRaw('CASE WHEN ref_kelas_jabatan.kelas IS NULL THEN 1 ELSE 0 END, ref_kelas_jabatan.kelas DESC')
             ->orderBy('pegawai.nama_lengkap', 'asc')
             ->get();
 
-        return view('pegawai.index', compact('pegawais'));
+        $jabatans = RefJabatan::orderBy('nama_jabatan', 'asc')->get();
+
+        return view('pegawai.index', compact('pegawais', 'jabatans'));
     }
 
     /**

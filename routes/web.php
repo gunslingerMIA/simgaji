@@ -7,9 +7,7 @@ use App\Http\Controllers\PegawaiPasanganController;
 use App\Http\Controllers\RefGajiController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('dashboard');
-});
+Route::get('/', [\App\Http\Controllers\DashboardController::class, 'index'])->name('dashboard');
 Route::get('cetak-kp4', [PegawaiController::class, 'indexKp4'])->name('cetak-kp4.index');
 
 Route::get('pegawai/template', [PegawaiController::class, 'downloadTemplate'])->name('pegawai.template');
@@ -37,3 +35,17 @@ Route::resource('jabatan', JabatanController::class)->except(['create', 'show', 
 Route::put('jabatan/kelas/{id}', [JabatanController::class, 'updateKelas'])->name('jabatan.kelas.update');
 
 Route::resource('pagu-anggaran', \App\Http\Controllers\PaguAnggaranController::class)->except(['create', 'show']);
+
+Route::post('gaji-induk-pns/lock', [\App\Http\Controllers\GajiIndukPnsController::class, 'lock'])->name('gaji-induk-pns.lock');
+Route::post('gaji-induk-pns/unlock', [\App\Http\Controllers\GajiIndukPnsController::class, 'unlock'])->name('gaji-induk-pns.unlock');
+Route::resource('gaji-induk-pns', \App\Http\Controllers\GajiIndukPnsController::class)->only(['index', 'create', 'store', 'show', 'update', 'destroy']);
+
+Route::post('gaji-induk-pppk/lock', [\App\Http\Controllers\GajiIndukPppkController::class, 'lock'])->name('gaji-induk-pppk.lock');
+Route::post('gaji-induk-pppk/unlock', [\App\Http\Controllers\GajiIndukPppkController::class, 'unlock'])->name('gaji-induk-pppk.unlock');
+Route::resource('gaji-induk-pppk', \App\Http\Controllers\GajiIndukPppkController::class)->only(['index', 'create', 'store', 'show', 'update', 'destroy']);
+
+Route::post('gaji-induk-pppk-paruh-waktu/lock', [\App\Http\Controllers\GajiIndukPppkParuhWaktuController::class, 'lock'])->name('gaji-induk-pppk-paruh-waktu.lock');
+Route::post('gaji-induk-pppk-paruh-waktu/unlock', [\App\Http\Controllers\GajiIndukPppkParuhWaktuController::class, 'unlock'])->name('gaji-induk-pppk-paruh-waktu.unlock');
+Route::resource('gaji-induk-pppk-paruh-waktu', \App\Http\Controllers\GajiIndukPppkParuhWaktuController::class)->only(['index', 'create', 'store', 'destroy']);
+
+Route::get('early-warning', [\App\Http\Controllers\EarlyWarningController::class, 'index'])->name('early-warning.index');

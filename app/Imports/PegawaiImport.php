@@ -146,7 +146,7 @@ class PegawaiImport implements SkipsEmptyRows, ToCollection, WithHeadingRow, Wit
                     'alamat' => ! empty($alamat) ? trim((string) $alamat) : null,
                     'status_kepegawaian' => $statusKepegawaian,
                     'status_pernikahan' => $statusPernikahan,
-                    'golongan' => $golongan,
+                    'golongan' => !empty($golongan) ? $golongan : '-',
                     'mkg_tahun' => $row['mkg_tahun'] ?? 0,
                     'mkg_bulan' => $row['mkg_bulan'] ?? 0,
                     'gaji_kontrak' => $row['gaji_kontrak_khusus_pppk_paruh_waktu'] ?? null,
@@ -154,8 +154,8 @@ class PegawaiImport implements SkipsEmptyRows, ToCollection, WithHeadingRow, Wit
                     'is_penyetaraan' => in_array(strtolower(trim((string) $this->getFirst($row, ['penyetaraan_jabatan_10', 'penyetaraan', 'is_penyetaraan']))), ['1', 'ya', 'yes', 'true']),
                     'tmt_cpns' => $this->transformDate($row['tmt_cpns_yyyy_mm_dd'] ?? null),
                     'tmt_pns' => $this->transformDate($row['tmt_pns_yyyy_mm_dd'] ?? null),
-                    'tmt_pangkat_terakhir' => $this->transformDate($row['tmt_pangkat_terakhir_yyyy_mm_dd']),
-                    'tmt_kgb_terakhir' => $this->transformDate($row['tmt_kgb_terakhir_yyyy_mm_dd']),
+                    'tmt_pangkat_terakhir' => $this->transformDate($this->getFirst($row, ['tmt_pangkat_terakhir_yyyy_mm_dd', 'tmt_pangkat_terakhir'])) ?? '1970-01-01',
+                    'tmt_kgb_terakhir' => $this->transformDate($this->getFirst($row, ['tmt_kgb_terakhir_yyyy_mm_dd', 'tmt_kgb_terakhir'])) ?? '1970-01-01',
                     'nomor_rekening' => $nomorRekening,
                     'nama_bank' => $namaBank,
                     'nama_pada_rekening' => $namaPadaRekening,
@@ -242,7 +242,7 @@ class PegawaiImport implements SkipsEmptyRows, ToCollection, WithHeadingRow, Wit
         }
     }
 
-    private function getFirst(array $row, array $keys, $default = null)
+    private function getFirst($row, array $keys, $default = null)
     {
         foreach ($keys as $key) {
             if (isset($row[$key]) && $row[$key] !== null && trim((string) $row[$key]) !== '') {
@@ -351,7 +351,7 @@ class PegawaiImport implements SkipsEmptyRows, ToCollection, WithHeadingRow, Wit
 
     private function transformDate($value)
     {
-        if (empty($value)) {
+        if (empty($value) || $value === '0000-00-00' || $value === '-') {
             return null;
         }
 
@@ -360,7 +360,11 @@ class PegawaiImport implements SkipsEmptyRows, ToCollection, WithHeadingRow, Wit
         }
 
         try {
-            return Carbon::parse($value)->format('Y-m-d');
+            $parsed = Carbon::parse($value);
+            if ($parsed->year < 1900) {
+                return null;
+            }
+            return $parsed->format('Y-m-d');
         } catch (\Exception $e) {
             return null;
         }

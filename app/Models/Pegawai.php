@@ -60,6 +60,21 @@ class Pegawai extends Model
         return $this->jabatan->getTppByStatus($this->status_kepegawaian, (bool) $this->is_penyetaraan);
     }
 
+    public function getNamaLengkapBergelarAttribute(): string
+    {
+        $nama = trim((string) $this->nama_lengkap);
+        
+        if (!empty($this->gelar_depan)) {
+            $nama = trim((string) $this->gelar_depan) . ' ' . $nama;
+        }
+        
+        if (!empty($this->gelar_belakang)) {
+            $nama = $nama . ', ' . trim((string) $this->gelar_belakang);
+        }
+        
+        return $nama;
+    }
+
     public function jabatan(): BelongsTo
     {
         return $this->belongsTo(RefJabatan::class, 'ref_jabatan_id');

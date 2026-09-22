@@ -15,7 +15,9 @@ class JabatanController extends Controller
     {
         $jabatans = RefJabatan::select('ref_jabatan.*')
             ->with('kelasJabatan')
-            ->withCount('pegawai')
+            ->withCount(['pegawai' => function ($query) {
+                $query->where('is_active', true);
+            }])
             ->leftJoin('ref_kelas_jabatan', 'ref_jabatan.ref_kelas_jabatan_id', '=', 'ref_kelas_jabatan.id')
             ->orderByRaw('CASE WHEN ref_kelas_jabatan.kelas IS NULL THEN 1 ELSE 0 END, ref_kelas_jabatan.kelas DESC')
             ->orderBy('ref_jabatan.nama_jabatan', 'asc')
