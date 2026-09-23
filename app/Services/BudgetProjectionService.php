@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
-use Illuminate\Support\Facades\DB;
 use App\Models\PaguAnggaran;
+use Illuminate\Support\Facades\DB;
 
 class BudgetProjectionService
 {
@@ -19,7 +19,7 @@ class BudgetProjectionService
             ->orderBy('bulan', 'desc')
             ->first();
 
-        if (!$latestPeriod) {
+        if (! $latestPeriod) {
             return 0;
         }
 
@@ -40,7 +40,7 @@ class BudgetProjectionService
             ->orderBy('bulan', 'desc')
             ->first();
 
-        if (!$latestPeriod) {
+        if (! $latestPeriod) {
             return 0;
         }
 
@@ -90,15 +90,15 @@ class BudgetProjectionService
         $latestGajiInduk = $this->getLatestGajiIndukTotal($tahun);
         $latestTpp = $this->getLatestTppTotal($tahun);
         $rapelTotal = $this->getRapelTotal($tahun);
-        
+
         $monthlyTotal = $latestGajiInduk + $latestTpp;
-        
+
         // 14 months = 12 months + Gaji 13 + Gaji 14
         // Plus rapel which is a one-time realized cost
         $projectedTotal = ($monthlyTotal * 14) + $rapelTotal;
-        
+
         $totalPagu = $this->getTotalPagu($tahun);
-        
+
         $variance = $totalPagu - $projectedTotal;
         $isDeficit = $variance < 0;
 

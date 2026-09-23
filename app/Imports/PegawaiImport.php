@@ -146,7 +146,7 @@ class PegawaiImport implements SkipsEmptyRows, ToCollection, WithHeadingRow, Wit
                     'alamat' => ! empty($alamat) ? trim((string) $alamat) : null,
                     'status_kepegawaian' => $statusKepegawaian,
                     'status_pernikahan' => $statusPernikahan,
-                    'golongan' => !empty($golongan) ? $golongan : '-',
+                    'golongan' => ! empty($golongan) ? $golongan : '-',
                     'mkg_tahun' => $row['mkg_tahun'] ?? 0,
                     'mkg_bulan' => $row['mkg_bulan'] ?? 0,
                     'gaji_kontrak' => $row['gaji_kontrak_khusus_pppk_paruh_waktu'] ?? null,
@@ -364,6 +364,7 @@ class PegawaiImport implements SkipsEmptyRows, ToCollection, WithHeadingRow, Wit
             if ($parsed->year < 1900) {
                 return null;
             }
+
             return $parsed->format('Y-m-d');
         } catch (\Exception $e) {
             return null;

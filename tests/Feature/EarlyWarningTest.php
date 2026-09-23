@@ -8,7 +8,7 @@ uses(RefreshDatabase::class);
 
 it('can view early warning system index and calculate deficit', function () {
     $tahun = '2026';
-    
+
     // Create Pagu
     PaguAnggaran::create([
         'tahun' => $tahun,
@@ -16,7 +16,7 @@ it('can view early warning system index and calculate deficit', function () {
         'uraian' => 'Belanja Gaji',
         'pagu_penetapan' => 10000000,
         'pagu_pergeseran' => 0,
-        'pagu_perubahan' => 0
+        'pagu_perubahan' => 0,
     ]);
 
     // Create Payroll Periode
@@ -26,7 +26,7 @@ it('can view early warning system index and calculate deficit', function () {
         'jenis' => 'gaji_induk',
         'is_locked' => true,
         'created_at' => now(),
-        'updated_at' => now()
+        'updated_at' => now(),
     ]);
 
     $periodeTppId = DB::table('payroll_periode')->insertGetId([
@@ -35,14 +35,14 @@ it('can view early warning system index and calculate deficit', function () {
         'jenis' => 'tpp',
         'is_locked' => true,
         'created_at' => now(),
-        'updated_at' => now()
+        'updated_at' => now(),
     ]);
 
     // We don't have pegawai seed, but we can just force insert to DB ignoring foreign keys for simple tests if we disable constraints,
     // or we can just create a dummy pegawai.
     $kelasId = DB::table('ref_kelas_jabatan')->insertGetId([
         'kelas' => 7,
-        'basic_tpp' => 1000
+        'basic_tpp' => 1000,
     ]);
 
     $jabatanId = DB::table('ref_jabatan')->insertGetId([
@@ -88,7 +88,7 @@ it('can view early warning system index and calculate deficit', function () {
         'potongan_bpjs_kesehatan' => 0,
         'potongan_pph21' => 0,
         'total_potongan' => 0,
-        'penghasilan_netto' => 1000000
+        'penghasilan_netto' => 1000000,
     ]);
 
     // Insert TPP
@@ -103,7 +103,7 @@ it('can view early warning system index and calculate deficit', function () {
         'tpp_kotor' => 500000, // Monthly TPP
         'tarif_pajak_persen' => 0,
         'potongan_pph21' => 0,
-        'tpp_netto' => 500000
+        'tpp_netto' => 500000,
     ]);
 
     // Insert Rapel
@@ -115,7 +115,7 @@ it('can view early warning system index and calculate deficit', function () {
         'tahun_bayar' => $tahun,
         'total_rapel_netto' => 100000,
         'created_at' => now(),
-        'updated_at' => now()
+        'updated_at' => now(),
     ]);
 
     DB::table('payroll_rapel_detail')->insert([
@@ -128,7 +128,7 @@ it('can view early warning system index and calculate deficit', function () {
         'selisih_iwp' => 0,
         'selisih_netto' => 100000,
         'created_at' => now(),
-        'updated_at' => now()
+        'updated_at' => now(),
     ]);
 
     // The projection should be:

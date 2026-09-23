@@ -1,13 +1,21 @@
 <?php
 
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\EarlyWarningController;
+use App\Http\Controllers\GajiIndukPnsController;
+use App\Http\Controllers\GajiIndukPppkController;
+use App\Http\Controllers\GajiIndukPppkParuhWaktuController;
 use App\Http\Controllers\JabatanController;
+use App\Http\Controllers\PaguAnggaranController;
 use App\Http\Controllers\PegawaiAnakController;
 use App\Http\Controllers\PegawaiController;
 use App\Http\Controllers\PegawaiPasanganController;
+use App\Http\Controllers\PegawaiRiwayatController;
 use App\Http\Controllers\RefGajiController;
+use App\Http\Controllers\TppController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', [\App\Http\Controllers\DashboardController::class, 'index'])->name('dashboard');
+Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 Route::get('cetak-kp4', [PegawaiController::class, 'indexKp4'])->name('cetak-kp4.index');
 
 Route::get('pegawai/template', [PegawaiController::class, 'downloadTemplate'])->name('pegawai.template');
@@ -15,6 +23,9 @@ Route::post('pegawai/import', [PegawaiController::class, 'import'])->name('pegaw
 Route::get('pegawai/{id}/api-detail', [PegawaiController::class, 'apiDetail'])->name('pegawai.api.detail');
 Route::get('pegawai/{id}/kp4', [PegawaiController::class, 'cetakKp4'])->name('pegawai.kp4');
 Route::resource('pegawai', PegawaiController::class);
+Route::post('pegawai/{id}/riwayat', [PegawaiRiwayatController::class, 'store'])->name('pegawai.riwayat.store');
+Route::put('pegawai/riwayat/{id}', [PegawaiRiwayatController::class, 'update'])->name('pegawai.riwayat.update');
+Route::delete('pegawai/riwayat/{id}', [PegawaiRiwayatController::class, 'destroy'])->name('pegawai.riwayat.destroy');
 Route::post('pegawai/{id}/pasangan', [PegawaiPasanganController::class, 'store'])->name('pegawai.pasangan.store');
 Route::put('pegawai/{id}/pasangan/{pasangan_id}', [PegawaiPasanganController::class, 'update'])->name('pegawai.pasangan.update');
 Route::delete('pasangan/{id}', [PegawaiPasanganController::class, 'destroy'])->name('pegawai.pasangan.destroy');
@@ -34,18 +45,23 @@ Route::post('referensi-gaji/import/pppk', [RefGajiController::class, 'importPppk
 Route::resource('jabatan', JabatanController::class)->except(['create', 'show', 'edit']);
 Route::put('jabatan/kelas/{id}', [JabatanController::class, 'updateKelas'])->name('jabatan.kelas.update');
 
-Route::resource('pagu-anggaran', \App\Http\Controllers\PaguAnggaranController::class)->except(['create', 'show']);
+Route::resource('pagu-anggaran', PaguAnggaranController::class)->except(['create', 'show']);
 
-Route::post('gaji-induk-pns/lock', [\App\Http\Controllers\GajiIndukPnsController::class, 'lock'])->name('gaji-induk-pns.lock');
-Route::post('gaji-induk-pns/unlock', [\App\Http\Controllers\GajiIndukPnsController::class, 'unlock'])->name('gaji-induk-pns.unlock');
-Route::resource('gaji-induk-pns', \App\Http\Controllers\GajiIndukPnsController::class)->only(['index', 'create', 'store', 'show', 'update', 'destroy']);
+Route::post('gaji-induk-pns/lock', [GajiIndukPnsController::class, 'lock'])->name('gaji-induk-pns.lock');
+Route::post('gaji-induk-pns/unlock', [GajiIndukPnsController::class, 'unlock'])->name('gaji-induk-pns.unlock');
+Route::resource('gaji-induk-pns', GajiIndukPnsController::class)->only(['index', 'create', 'store', 'show', 'update', 'destroy']);
 
-Route::post('gaji-induk-pppk/lock', [\App\Http\Controllers\GajiIndukPppkController::class, 'lock'])->name('gaji-induk-pppk.lock');
-Route::post('gaji-induk-pppk/unlock', [\App\Http\Controllers\GajiIndukPppkController::class, 'unlock'])->name('gaji-induk-pppk.unlock');
-Route::resource('gaji-induk-pppk', \App\Http\Controllers\GajiIndukPppkController::class)->only(['index', 'create', 'store', 'show', 'update', 'destroy']);
+Route::post('gaji-induk-pppk/lock', [GajiIndukPppkController::class, 'lock'])->name('gaji-induk-pppk.lock');
+Route::post('gaji-induk-pppk/unlock', [GajiIndukPppkController::class, 'unlock'])->name('gaji-induk-pppk.unlock');
+Route::resource('gaji-induk-pppk', GajiIndukPppkController::class)->only(['index', 'create', 'store', 'show', 'update', 'destroy']);
 
-Route::post('gaji-induk-pppk-paruh-waktu/lock', [\App\Http\Controllers\GajiIndukPppkParuhWaktuController::class, 'lock'])->name('gaji-induk-pppk-paruh-waktu.lock');
-Route::post('gaji-induk-pppk-paruh-waktu/unlock', [\App\Http\Controllers\GajiIndukPppkParuhWaktuController::class, 'unlock'])->name('gaji-induk-pppk-paruh-waktu.unlock');
-Route::resource('gaji-induk-pppk-paruh-waktu', \App\Http\Controllers\GajiIndukPppkParuhWaktuController::class)->only(['index', 'create', 'store', 'destroy']);
+Route::post('gaji-induk-pppk-paruh-waktu/lock', [GajiIndukPppkParuhWaktuController::class, 'lock'])->name('gaji-induk-pppk-paruh-waktu.lock');
+Route::post('gaji-induk-pppk-paruh-waktu/unlock', [GajiIndukPppkParuhWaktuController::class, 'unlock'])->name('gaji-induk-pppk-paruh-waktu.unlock');
+Route::resource('gaji-induk-pppk-paruh-waktu', GajiIndukPppkParuhWaktuController::class)->only(['index', 'create', 'store', 'destroy']);
 
-Route::get('early-warning', [\App\Http\Controllers\EarlyWarningController::class, 'index'])->name('early-warning.index');
+Route::post('tpp/lock', [TppController::class, 'lock'])->name('tpp.lock');
+Route::post('tpp/unlock', [TppController::class, 'unlock'])->name('tpp.unlock');
+Route::post('tpp/sync-historis', [TppController::class, 'syncHistoris'])->name('tpp.sync-historis');
+Route::resource('tpp', TppController::class)->only(['index', 'create', 'store', 'update', 'destroy']);
+
+Route::get('early-warning', [EarlyWarningController::class, 'index'])->name('early-warning.index');

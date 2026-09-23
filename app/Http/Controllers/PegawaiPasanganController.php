@@ -13,18 +13,18 @@ class PegawaiPasanganController extends Controller
     public function store(Request $request, string $id)
     {
         $validated = $request->validate([
-            'nama_pasangan'    => 'required|string|max:255',
-            'nik_pasangan'     => 'required|string|max:20',
-            'pekerjaan'        => 'required|string|max:255',
-            'tempat_lahir'     => 'nullable|string|max:100',
-            'tanggal_lahir'    => 'required|date',
-            'tanggal_menikah'  => 'required|date',
-            'nip_pasangan'     => 'nullable|string|max:30',
+            'nama_pasangan' => 'required|string|max:255',
+            'nik_pasangan' => 'required|string|max:20',
+            'pekerjaan' => 'required|string|max:255',
+            'tempat_lahir' => 'nullable|string|max:100',
+            'tanggal_lahir' => 'required|date',
+            'tanggal_menikah' => 'required|date',
+            'nip_pasangan' => 'nullable|string|max:30',
             'nomor_buku_nikah' => 'nullable|string|max:100',
-            'dapat_tunjangan'  => 'nullable|boolean',
+            'dapat_tunjangan' => 'nullable|boolean',
         ]);
 
-        $validated['pegawai_id']      = $id;
+        $validated['pegawai_id'] = $id;
         $validated['dapat_tunjangan'] = $request->boolean('dapat_tunjangan');
 
         PegawaiPasangan::create($validated);
@@ -40,15 +40,15 @@ class PegawaiPasanganController extends Controller
         $pasangan = PegawaiPasangan::findOrFail($pasangan_id);
 
         $validated = $request->validate([
-            'nama_pasangan'    => 'required|string|max:255',
-            'nik_pasangan'     => 'required|string|max:20',
-            'pekerjaan'        => 'required|string|max:255',
-            'tempat_lahir'     => 'nullable|string|max:100',
-            'tanggal_lahir'    => 'required|date',
-            'tanggal_menikah'  => 'required|date',
-            'nip_pasangan'     => 'nullable|string|max:30',
+            'nama_pasangan' => 'required|string|max:255',
+            'nik_pasangan' => 'required|string|max:20',
+            'pekerjaan' => 'required|string|max:255',
+            'tempat_lahir' => 'nullable|string|max:100',
+            'tanggal_lahir' => 'required|date',
+            'tanggal_menikah' => 'required|date',
+            'nip_pasangan' => 'nullable|string|max:30',
             'nomor_buku_nikah' => 'nullable|string|max:100',
-            'dapat_tunjangan'  => 'nullable|boolean',
+            'dapat_tunjangan' => 'nullable|boolean',
         ]);
 
         $validated['dapat_tunjangan'] = $request->boolean('dapat_tunjangan');

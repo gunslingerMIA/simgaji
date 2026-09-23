@@ -27,7 +27,7 @@ class GajiIndukPppkParuhWaktuController extends Controller
     {
         $bulan = date('m');
         $tahun = date('Y');
-        
+
         // Retrieve last used UMK or default
         $umk = Cache::get('default_umk_paruh_waktu', 2500000);
 

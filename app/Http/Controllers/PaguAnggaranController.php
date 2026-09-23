@@ -10,11 +10,11 @@ class PaguAnggaranController extends Controller
     public function index(Request $request)
     {
         $tahun = $request->get('tahun', date('Y'));
-        
+
         $paguAnggaran = PaguAnggaran::where('tahun', $tahun)
             ->orderBy('kode_rekening', 'asc')
             ->get();
-            
+
         return view('pagu-anggaran.index', compact('paguAnggaran', 'tahun'));
     }
 

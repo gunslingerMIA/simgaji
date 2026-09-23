@@ -137,9 +137,9 @@ class GajiIndukPnsController extends Controller
 
             // Tunjangan PPh menggunakan skema TER
             $brutoBase = $gapok + $tunjIstri + $tunjAnak + $totalTunjJabatan + $tunjBres + $tunjBpjs + $tunjJkk + $tunjJkm;
-            if($pegawai->jenis_kelamin == "L"){
+            if ($pegawai->jenis_kelamin == 'L') {
                 $ptkpStatus = $pegawai->status_pernikahan ?? 'TK/0';
-            }else{
+            } else {
                 $ptkpStatus = $pegawai->ptkp_status;
             }
             $terCategory = PphTerCalculator::getCategory($ptkpStatus);

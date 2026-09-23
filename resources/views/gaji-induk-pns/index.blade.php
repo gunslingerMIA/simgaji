@@ -1,5 +1,8 @@
 @extends('layouts.app')
 
+@section('title', 'Gaji Induk PNS')
+@section('page_title', 'Gaji Induk PNS')
+
 @section('content')
 <div class="container-fluid">
     <div class="row">
@@ -29,6 +32,64 @@
                         <div class="alert alert-danger alert-dismissible fade show" role="alert">
                             {{ session('error') }}
                             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    @endif
+
+                    <!-- Summary Cards -->
+                    @if(count($gajiPns) > 0)
+                        <div class="row g-3 mb-4">
+                            <div class="col-xl-3 col-md-6">
+                                <div class="card bg-light border-0 shadow-sm p-3">
+                                    <div class="d-flex align-items-center">
+                                        <div class="rounded-3 bg-primary bg-opacity-10 p-3 text-primary me-3">
+                                            <i class="fa-solid fa-users fa-xl"></i>
+                                        </div>
+                                        <div>
+                                            <div class="text-muted small fw-semibold">Total Pegawai</div>
+                                            <div class="fs-5 fw-bold text-dark">{{ count($gajiPns) }} Orang</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-xl-3 col-md-6">
+                                <div class="card bg-light border-0 shadow-sm p-3">
+                                    <div class="d-flex align-items-center">
+                                        <div class="rounded-3 bg-info bg-opacity-10 p-3 text-info me-3">
+                                            <i class="fa-solid fa-coins fa-xl"></i>
+                                        </div>
+                                        <div>
+                                            <div class="text-muted small fw-semibold">Total Gaji Bruto</div>
+                                            <div class="fs-5 fw-bold text-dark">Rp {{ number_format($gajiPns->sum('kotor_resmi'), 0, ',', '.') }}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-xl-3 col-md-6">
+                                <div class="card bg-light border-0 shadow-sm p-3">
+                                    <div class="d-flex align-items-center">
+                                        <div class="rounded-3 bg-danger bg-opacity-10 p-3 text-danger me-3">
+                                            <i class="fa-solid fa-receipt fa-xl"></i>
+                                        </div>
+                                        <div>
+                                            <div class="text-muted small fw-semibold">Total Potongan</div>
+                                            <div class="fs-5 fw-bold text-dark">Rp {{ number_format($gajiPns->sum('jumlah_potongan'), 0, ',', '.') }}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-xl-3 col-md-6">
+                                <div class="card bg-light border-0 shadow-sm p-3">
+                                    <div class="d-flex align-items-center">
+                                        <div class="rounded-3 bg-success bg-opacity-10 p-3 text-success me-3">
+                                            <i class="fa-solid fa-wallet fa-xl"></i>
+                                        </div>
+                                        <div>
+                                            <div class="text-muted small fw-semibold">Total Gaji Bersih</div>
+                                            <div class="fs-5 fw-bold text-success">Rp {{ number_format($gajiPns->sum('bersih_resmi'), 0, ',', '.') }}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     @endif
 

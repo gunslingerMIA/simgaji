@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\RefGajiPokokPns;
-use App\Models\RefGajiPokokPppk;
-use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\RefGajiPnsImport;
 use App\Imports\RefGajiPppkImport;
+use App\Models\RefGajiPokokPns;
+use App\Models\RefGajiPokokPppk;
+use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
@@ -17,43 +17,43 @@ class RefGajiController extends Controller
     {
         $gajiPns = RefGajiPokokPns::orderBy('golongan', 'asc')->orderBy('mkg', 'asc')->get();
         $gajiPppk = RefGajiPokokPppk::orderBy('golongan', 'asc')->orderBy('mkg', 'asc')->get();
-        
+
         return view('referensi-gaji.index', compact('gajiPns', 'gajiPppk'));
     }
 
     public function updatePns(Request $request, $id)
     {
         $validated = $request->validate([
-            'nominal' => 'required|numeric|min:0'
+            'nominal' => 'required|numeric|min:0',
         ]);
 
         $ref = RefGajiPokokPns::findOrFail($id);
         $ref->update($validated);
 
-        return redirect()->route('referensi-gaji.index')->with('success', 'Nominal Gaji PNS Gol ' . $ref->golongan . ' (MKG: ' . $ref->mkg . ' thn) berhasil diupdate.');
+        return redirect()->route('referensi-gaji.index')->with('success', 'Nominal Gaji PNS Gol '.$ref->golongan.' (MKG: '.$ref->mkg.' thn) berhasil diupdate.');
     }
 
     public function updatePppk(Request $request, $id)
     {
         $validated = $request->validate([
-            'nominal' => 'required|numeric|min:0'
+            'nominal' => 'required|numeric|min:0',
         ]);
 
         $ref = RefGajiPokokPppk::findOrFail($id);
         $ref->update($validated);
 
-        return redirect()->route('referensi-gaji.index')->with('success', 'Nominal Gaji PPPK Gol ' . $ref->golongan . ' (MKG: ' . $ref->mkg . ' thn) berhasil diupdate.');
+        return redirect()->route('referensi-gaji.index')->with('success', 'Nominal Gaji PPPK Gol '.$ref->golongan.' (MKG: '.$ref->mkg.' thn) berhasil diupdate.');
     }
 
     public function templatePns()
     {
-        $spreadsheet = new Spreadsheet();
+        $spreadsheet = new Spreadsheet;
         $sheet = $spreadsheet->getActiveSheet();
-        
+
         $sheet->setCellValue('A1', 'Golongan');
         $sheet->setCellValue('B1', 'MKG');
         $sheet->setCellValue('C1', 'Nominal');
-        
+
         // Example data
         $sheet->setCellValue('A2', 'III/a');
         $sheet->setCellValue('B2', '0');
@@ -61,24 +61,24 @@ class RefGajiController extends Controller
 
         $writer = new Xlsx($spreadsheet);
         $filename = 'Template_Gaji_Pokok_PNS.xlsx';
-        
+
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        header('Content-Disposition: attachment;filename="' . $filename . '"');
+        header('Content-Disposition: attachment;filename="'.$filename.'"');
         header('Cache-Control: max-age=0');
-        
+
         $writer->save('php://output');
         exit;
     }
 
     public function templatePppk()
     {
-        $spreadsheet = new Spreadsheet();
+        $spreadsheet = new Spreadsheet;
         $sheet = $spreadsheet->getActiveSheet();
-        
+
         $sheet->setCellValue('A1', 'Golongan');
         $sheet->setCellValue('B1', 'MKG');
         $sheet->setCellValue('C1', 'Nominal');
-        
+
         // Example data
         $sheet->setCellValue('A2', 'IX');
         $sheet->setCellValue('B2', '0');
@@ -86,11 +86,11 @@ class RefGajiController extends Controller
 
         $writer = new Xlsx($spreadsheet);
         $filename = 'Template_Gaji_Pokok_PPPK.xlsx';
-        
+
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        header('Content-Disposition: attachment;filename="' . $filename . '"');
+        header('Content-Disposition: attachment;filename="'.$filename.'"');
         header('Cache-Control: max-age=0');
-        
+
         $writer->save('php://output');
         exit;
     }
@@ -98,7 +98,7 @@ class RefGajiController extends Controller
     public function importPns(Request $request)
     {
         $request->validate([
-            'file' => 'required|mimes:xlsx,xls,csv'
+            'file' => 'required|mimes:xlsx,xls,csv',
         ]);
 
         Excel::import(new RefGajiPnsImport, $request->file('file'));
@@ -109,7 +109,7 @@ class RefGajiController extends Controller
     public function importPppk(Request $request)
     {
         $request->validate([
-            'file' => 'required|mimes:xlsx,xls,csv'
+            'file' => 'required|mimes:xlsx,xls,csv',
         ]);
 
         Excel::import(new RefGajiPppkImport, $request->file('file'));

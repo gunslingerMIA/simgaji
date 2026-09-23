@@ -21,11 +21,11 @@ it('can view referensi gaji index', function () {
 
 it('can update referensi gaji pns', function () {
     $pns = RefGajiPokokPns::factory()->create([
-        'nominal' => 2000000
+        'nominal' => 2000000,
     ]);
 
     $response = $this->put(route('referensi-gaji.update.pns', $pns->id), [
-        'nominal' => 2500000
+        'nominal' => 2500000,
     ]);
 
     $response->assertRedirect(route('referensi-gaji.index'));
@@ -33,17 +33,17 @@ it('can update referensi gaji pns', function () {
 
     $this->assertDatabaseHas('ref_gaji_pokok_pns', [
         'id' => $pns->id,
-        'nominal' => 2500000
+        'nominal' => 2500000,
     ]);
 });
 
 it('can update referensi gaji pppk', function () {
     $pppk = RefGajiPokokPppk::factory()->create([
-        'nominal' => 3000000
+        'nominal' => 3000000,
     ]);
 
     $response = $this->put(route('referensi-gaji.update.pppk', $pppk->id), [
-        'nominal' => 3500000
+        'nominal' => 3500000,
     ]);
 
     $response->assertRedirect(route('referensi-gaji.index'));
@@ -51,7 +51,7 @@ it('can update referensi gaji pppk', function () {
 
     $this->assertDatabaseHas('ref_gaji_pokok_pppk', [
         'id' => $pppk->id,
-        'nominal' => 3500000
+        'nominal' => 3500000,
     ]);
 });
 

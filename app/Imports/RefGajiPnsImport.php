@@ -3,16 +3,15 @@
 namespace App\Imports;
 
 use App\Models\RefGajiPokokPns;
+use Illuminate\Database\Eloquent\Model;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 
 class RefGajiPnsImport implements ToModel, WithHeadingRow
 {
     /**
-    * @param array $row
-    *
-    * @return \Illuminate\Database\Eloquent\Model|null
-    */
+     * @return Model|null
+     */
     public function model(array $row)
     {
         return RefGajiPokokPns::updateOrCreate(

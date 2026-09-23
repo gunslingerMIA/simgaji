@@ -17,7 +17,7 @@
                         </div>
                     </div>
 
-                    <form action="{{ route('gaji-induk-PPPK Paruh Waktu-paruh-waktu.store') }}" method="POST" id="formGenerate">
+                    <form action="{{ route('gaji-induk-pppk-paruh-waktu.store') }}" method="POST" id="formGenerate">
                         @csrf
                         <div class="row g-3 mb-4">
                             <div class="col-md-6">

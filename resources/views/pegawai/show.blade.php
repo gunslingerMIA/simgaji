@@ -101,8 +101,94 @@
         </div>
     </div>
 
-    {{-- Kolom Kanan: Data Keluarga --}}
+    {{-- Kolom Kanan: Riwayat & Data Keluarga --}}
     <div class="col-md-8 col-lg-9">
+
+        {{-- Riwayat Jabatan & Kepegawaian (Timeline) --}}
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+                <div>
+                    <span class="fw-bold"><i class="fa-solid fa-timeline me-2 text-primary"></i>Riwayat Jabatan &amp; Kepegawaian</span>
+                    <span class="text-muted small ms-2 d-none d-sm-inline">(Timeline TMT untuk penarikan Gaji/TPP historis)</span>
+                </div>
+                <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#tambahRiwayatModal">
+                    <i class="fa-solid fa-plus me-1"></i> Tambah Riwayat
+                </button>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0" style="font-size: 0.9em;">
+                        <thead class="table-light">
+                            <tr>
+                                <th>TMT Berlaku</th>
+                                <th>Jabatan &amp; Kelas</th>
+                                <th>Status / Gol</th>
+                                <th>Keaktifan</th>
+                                <th>Keterangan / No. SK</th>
+                                <th class="text-center" width="100px">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($pegawai->riwayat as $riw)
+                            <tr>
+                                <td>
+                                    <div class="fw-bold text-dark">{{ $riw->tmt_berlaku ? $riw->tmt_berlaku->format('d/m/Y') : '-' }}</div>
+                                    <small class="text-muted">{{ $riw->tmt_berlaku ? $riw->tmt_berlaku->diffForHumans() : '' }}</small>
+                                </td>
+                                <td>
+                                    <strong>{{ $riw->jabatan ? $riw->jabatan->nama_jabatan : '-' }}</strong>
+                                    <div class="small text-muted">
+                                        @if($riw->jabatan && $riw->jabatan->kelasJabatan)
+                                            <span class="badge bg-light text-dark border">Kelas {{ $riw->jabatan->kelasJabatan->kelas }}</span>
+                                        @endif
+                                        @if($riw->is_penyetaraan)
+                                            <span class="badge bg-warning bg-opacity-25 text-dark border border-warning">Penyetaraan</span>
+                                        @endif
+                                    </div>
+                                </td>
+                                <td>
+                                    <div><span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25">{{ strtoupper(str_replace('_', ' ', $riw->status_kepegawaian)) }}</span></div>
+                                    @if($riw->golongan)
+                                        <small class="text-muted">Gol. {{ $riw->golongan }}</small>
+                                    @endif
+                                </td>
+                                <td>
+                                    @if($riw->is_active && $riw->status_keaktifan === 'aktif')
+                                        <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25"><i class="fa-solid fa-circle-check me-1"></i>Aktif</span>
+                                    @else
+                                        <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25">
+                                            <i class="fa-solid fa-circle-xmark me-1"></i>{{ ucfirst(str_replace('_', ' ', $riw->status_keaktifan)) }}
+                                        </span>
+                                    @endif
+                                </td>
+                                <td>
+                                    <div>{{ $riw->keterangan ?? '-' }}</div>
+                                    @if($riw->nomor_sk)
+                                        <small class="text-muted">SK: {{ $riw->nomor_sk }}</small>
+                                    @endif
+                                </td>
+                                <td class="text-center">
+                                    <button class="btn btn-sm btn-warning me-1 edit-riwayat-btn" data-riwayat='@json($riw)'>
+                                        <i class="fa-solid fa-pen-to-square"></i>
+                                    </button>
+                                    @if($pegawai->riwayat->count() > 1)
+                                    <form action="{{ route('pegawai.riwayat.destroy', $riw->id) }}" method="POST" class="d-inline delete-form">
+                                        @csrf @method('DELETE')
+                                        <button type="submit" class="btn btn-sm btn-danger"><i class="fa-solid fa-trash"></i></button>
+                                    </form>
+                                    @endif
+                                </td>
+                            </tr>
+                            @empty
+                            <tr>
+                                <td colspan="6" class="text-center text-muted py-4">Belum ada data riwayat kepegawaian.</td>
+                            </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
 
         {{-- Data Pasangan --}}
         <div class="card shadow-sm border-0 mb-4">
@@ -530,6 +616,170 @@
     </div>
   </div>
 </div>
+
+{{-- Modal Tambah Riwayat Kepegawaian --}}
+<div class="modal fade" id="tambahRiwayatModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header border-bottom-0">
+        <h5 class="modal-title fw-bold"><i class="fa-solid fa-timeline me-2 text-primary"></i>Tambah Riwayat Kepegawaian</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form action="{{ route('pegawai.riwayat.store', $pegawai->id) }}" method="POST">
+          @csrf
+          <div class="modal-body">
+              <div class="row">
+                  <div class="col-md-6 mb-3">
+                      <label class="form-label fw-semibold">Tanggal Mulai Berlaku (TMT) <span class="text-danger">*</span></label>
+                      <input type="date" name="tmt_berlaku" class="form-control" required value="{{ date('Y-m-d') }}">
+                      <small class="text-muted">Tanggal berlakunya SK / jabatan / status ini.</small>
+                  </div>
+                  <div class="col-md-6 mb-3">
+                      <label class="form-label fw-semibold">Nomor SK / Dokumen</label>
+                      <input type="text" name="nomor_sk" class="form-control" placeholder="Contoh: 821.2/01/BKPSDM/2026">
+                  </div>
+              </div>
+
+              <div class="mb-3">
+                  <label class="form-label fw-semibold">Jabatan <span class="text-danger">*</span></label>
+                  <select name="ref_jabatan_id" class="form-select" required>
+                      @foreach($allJabatan as $jab)
+                          <option value="{{ $jab->id }}" {{ $pegawai->ref_jabatan_id == $jab->id ? 'selected' : '' }}>
+                              {{ $jab->nama_jabatan }} (Kelas {{ $jab->kelasJabatan->kelas ?? '-' }})
+                          </option>
+                      @endforeach
+                  </select>
+              </div>
+
+              <div class="row">
+                  <div class="col-md-4 mb-3">
+                      <label class="form-label fw-semibold">Status Kepegawaian <span class="text-danger">*</span></label>
+                      <select name="status_kepegawaian" class="form-select" required>
+                          <option value="pns" {{ $pegawai->status_kepegawaian === 'pns' ? 'selected' : '' }}>PNS</option>
+                          <option value="cpns" {{ $pegawai->status_kepegawaian === 'cpns' ? 'selected' : '' }}>CPNS</option>
+                          <option value="pppk" {{ $pegawai->status_kepegawaian === 'pppk' ? 'selected' : '' }}>PPPK</option>
+                          <option value="pppk_paruh_waktu" {{ $pegawai->status_kepegawaian === 'pppk_paruh_waktu' ? 'selected' : '' }}>PPPK Paruh Waktu</option>
+                      </select>
+                  </div>
+                  <div class="col-md-4 mb-3">
+                      <label class="form-label fw-semibold">Golongan / Ruang <span class="text-danger">*</span></label>
+                      <input type="text" name="golongan" class="form-control" required value="{{ $pegawai->golongan }}" placeholder="Contoh: III/a, IX">
+                  </div>
+                  <div class="col-md-4 mb-3">
+                      <label class="form-label fw-semibold">Status Keaktifan <span class="text-danger">*</span></label>
+                      <select name="status_keaktifan" class="form-select" required>
+                          <option value="aktif">Aktif</option>
+                          <option value="pensiun">Pensiun</option>
+                          <option value="mutasi_keluar">Mutasi Keluar</option>
+                          <option value="cuti_diluar_tanggungan">Cuti di Luar Tanggungan</option>
+                          <option value="meninggal">Meninggal</option>
+                          <option value="nonaktif">Nonaktif</option>
+                      </select>
+                  </div>
+              </div>
+
+              <div class="mb-3">
+                  <div class="form-check">
+                      <input class="form-check-input" type="checkbox" name="is_penyetaraan" id="riwayat_penyetaraan" value="1" {{ $pegawai->is_penyetaraan ? 'checked' : '' }}>
+                      <label class="form-check-label fw-semibold" for="riwayat_penyetaraan">Jabatan Penyetaraan</label>
+                  </div>
+              </div>
+
+              <div class="mb-3">
+                  <label class="form-label fw-semibold">Keterangan / Alasan Perubahan</label>
+                  <input type="text" name="keterangan" class="form-control" placeholder="Contoh: Pengangkatan CPNS, Pelantikan Sekretaris, Kenaikan Pangkat">
+              </div>
+          </div>
+          <div class="modal-footer border-top-0">
+            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
+            <button type="submit" class="btn btn-primary">Simpan Riwayat</button>
+          </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+{{-- Modal Edit Riwayat Kepegawaian --}}
+<div class="modal fade" id="editRiwayatModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header border-bottom-0">
+        <h5 class="modal-title fw-bold"><i class="fa-solid fa-pen-to-square me-2 text-warning"></i>Edit Riwayat Kepegawaian</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form id="formEditRiwayat" method="POST">
+          @csrf
+          @method('PUT')
+          <div class="modal-body">
+              <div class="row">
+                  <div class="col-md-6 mb-3">
+                      <label class="form-label fw-semibold">Tanggal Mulai Berlaku (TMT) <span class="text-danger">*</span></label>
+                      <input type="date" name="tmt_berlaku" id="edit_riw_tmt_berlaku" class="form-control" required>
+                  </div>
+                  <div class="col-md-6 mb-3">
+                      <label class="form-label fw-semibold">Nomor SK / Dokumen</label>
+                      <input type="text" name="nomor_sk" id="edit_riw_nomor_sk" class="form-control">
+                  </div>
+              </div>
+
+              <div class="mb-3">
+                  <label class="form-label fw-semibold">Jabatan <span class="text-danger">*</span></label>
+                  <select name="ref_jabatan_id" id="edit_riw_ref_jabatan_id" class="form-select" required>
+                      @foreach($allJabatan as $jab)
+                          <option value="{{ $jab->id }}">
+                              {{ $jab->nama_jabatan }} (Kelas {{ $jab->kelasJabatan->kelas ?? '-' }})
+                          </option>
+                      @endforeach
+                  </select>
+              </div>
+
+              <div class="row">
+                  <div class="col-md-4 mb-3">
+                      <label class="form-label fw-semibold">Status Kepegawaian <span class="text-danger">*</span></label>
+                      <select name="status_kepegawaian" id="edit_riw_status_kepegawaian" class="form-select" required>
+                          <option value="pns">PNS</option>
+                          <option value="cpns">CPNS</option>
+                          <option value="pppk">PPPK</option>
+                          <option value="pppk_paruh_waktu">PPPK Paruh Waktu</option>
+                      </select>
+                  </div>
+                  <div class="col-md-4 mb-3">
+                      <label class="form-label fw-semibold">Golongan / Ruang <span class="text-danger">*</span></label>
+                      <input type="text" name="golongan" id="edit_riw_golongan" class="form-control" required>
+                  </div>
+                  <div class="col-md-4 mb-3">
+                      <label class="form-label fw-semibold">Status Keaktifan <span class="text-danger">*</span></label>
+                      <select name="status_keaktifan" id="edit_riw_status_keaktifan" class="form-select" required>
+                          <option value="aktif">Aktif</option>
+                          <option value="pensiun">Pensiun</option>
+                          <option value="mutasi_keluar">Mutasi Keluar</option>
+                          <option value="cuti_diluar_tanggungan">Cuti di Luar Tanggungan</option>
+                          <option value="meninggal">Meninggal</option>
+                          <option value="nonaktif">Nonaktif</option>
+                      </select>
+                  </div>
+              </div>
+
+              <div class="mb-3">
+                  <div class="form-check">
+                      <input class="form-check-input" type="checkbox" name="is_penyetaraan" id="edit_riw_is_penyetaraan" value="1">
+                      <label class="form-check-label fw-semibold" for="edit_riw_is_penyetaraan">Jabatan Penyetaraan</label>
+                  </div>
+              </div>
+
+              <div class="mb-3">
+                  <label class="form-label fw-semibold">Keterangan / Alasan Perubahan</label>
+                  <input type="text" name="keterangan" id="edit_riw_keterangan" class="form-control">
+              </div>
+          </div>
+          <div class="modal-footer border-top-0">
+            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
+            <button type="submit" class="btn btn-warning">Update Riwayat</button>
+          </div>
+      </form>
+    </div>
+  </div>
+</div>
 @endsection
 
 @push('scripts')
@@ -545,6 +795,23 @@
         const editKampusFields = document.getElementById('editKampusFields');
         editMasihKuliah.addEventListener('change', function() {
             editKampusFields.style.display = this.checked ? 'flex' : 'none';
+        });
+
+        // Edit Riwayat
+        document.querySelectorAll('.edit-riwayat-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                let data = JSON.parse(this.getAttribute('data-riwayat'));
+                document.getElementById('formEditRiwayat').action = '/pegawai/riwayat/' + data.id;
+                document.getElementById('edit_riw_tmt_berlaku').value = data.tmt_berlaku ? data.tmt_berlaku.substring(0, 10) : '';
+                document.getElementById('edit_riw_nomor_sk').value = data.nomor_sk ?? '';
+                document.getElementById('edit_riw_ref_jabatan_id').value = data.ref_jabatan_id ?? '';
+                document.getElementById('edit_riw_status_kepegawaian').value = data.status_kepegawaian ?? 'pns';
+                document.getElementById('edit_riw_golongan').value = data.golongan ?? '';
+                document.getElementById('edit_riw_status_keaktifan').value = data.status_keaktifan ?? 'aktif';
+                document.getElementById('edit_riw_is_penyetaraan').checked = !!data.is_penyetaraan;
+                document.getElementById('edit_riw_keterangan').value = data.keterangan ?? '';
+                new bootstrap.Modal(document.getElementById('editRiwayatModal')).show();
+            });
         });
 
         // Edit Pasangan

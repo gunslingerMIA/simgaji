@@ -17,7 +17,7 @@ class EarlyWarningController extends Controller
     public function index(Request $request)
     {
         $tahun = $request->get('tahun', date('Y'));
-        
+
         $projection = $this->projectionService->calculate($tahun);
 
         return view('early-warning.index', compact('projection', 'tahun'));

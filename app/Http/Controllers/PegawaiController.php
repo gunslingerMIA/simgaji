@@ -105,7 +105,8 @@ class PegawaiController extends Controller
      */
     public function show(string $id)
     {
-        $pegawai = Pegawai::with(['jabatan', 'pasangan', 'anak'])->findOrFail($id);
+        $pegawai = Pegawai::with(['jabatan.kelasJabatan', 'pasangan', 'anak', 'riwayat.jabatan.kelasJabatan'])->findOrFail($id);
+        $allJabatan = RefJabatan::with('kelasJabatan')->orderBy('nama_jabatan', 'asc')->get();
 
         $gajiPokok = 0;
         if ($pegawai->status_kepegawaian === 'pppk_paruh_waktu') {
@@ -159,7 +160,7 @@ class PegawaiController extends Controller
             }
         }
 
-        return view('pegawai.show', compact('pegawai', 'gajiPokok'));
+        return view('pegawai.show', compact('pegawai', 'gajiPokok', 'allJabatan'));
     }
 
     /**

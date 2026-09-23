@@ -6,7 +6,6 @@ use App\Models\Pegawai;
 use App\Models\PegawaiAnak;
 use App\Services\BudgetProjectionService;
 use Carbon\Carbon;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
@@ -32,7 +31,7 @@ class DashboardController extends Controller
             ->where('tahun', $currentYear)
             ->where('jenis', 'gaji_induk')
             ->first();
-            
+
         $gajiIndukTotal = 0;
         if ($periodeGajiInduk) {
             $gajiIndukTotal = DB::table('payroll_gaji_induk')
@@ -64,7 +63,7 @@ class DashboardController extends Controller
 
         // Peringatan EWS
         $alerts = [];
-        
+
         // 1. Anak mencapai batas usia 21 tahun (belum menikah/bekerja)
         $anak21 = PegawaiAnak::where('tanggal_lahir', '<=', Carbon::now()->subYears(21))->count();
         if ($anak21 > 0) {
@@ -72,7 +71,7 @@ class DashboardController extends Controller
                 'type' => 'warning',
                 'icon' => 'fa-child-reaching',
                 'title' => 'Batas Usia Anak (21 Th)',
-                'message' => "Terdapat {$anak21} data anak yang telah mencapai/melewati usia 21 tahun."
+                'message' => "Terdapat {$anak21} data anak yang telah mencapai/melewati usia 21 tahun.",
             ];
         }
 
@@ -85,7 +84,7 @@ class DashboardController extends Controller
                 'type' => 'info',
                 'icon' => 'fa-chart-line',
                 'title' => 'Jadwal KGB',
-                'message' => "Ada {$kgbPegawai} pegawai yang sudah waktunya memproses Kenaikan Gaji Berkala."
+                'message' => "Ada {$kgbPegawai} pegawai yang sudah waktunya memproses Kenaikan Gaji Berkala.",
             ];
         }
 
@@ -96,20 +95,20 @@ class DashboardController extends Controller
                 'type' => 'danger',
                 'icon' => 'fa-sack-dollar',
                 'title' => 'Defisit Pagu Anggaran',
-                'message' => "Proyeksi anggaran untuk tahun {$currentYear} mengalami defisit sebesar Rp " . number_format(abs($projection['variance']), 0, ',', '.')
+                'message' => "Proyeksi anggaran untuk tahun {$currentYear} mengalami defisit sebesar Rp ".number_format(abs($projection['variance']), 0, ',', '.'),
             ];
         }
 
         $totalAlerts = count($alerts);
 
         return view('dashboard', compact(
-            'totalPegawai', 
-            'gajiIndukTotal', 
+            'totalPegawai',
+            'gajiIndukTotal',
             'periodeGajiInduk',
-            'tppTotal', 
+            'tppTotal',
             'periodeTpp',
-            'aktivitas', 
-            'alerts', 
+            'aktivitas',
+            'alerts',
             'totalAlerts',
             'currentMonth',
             'currentYear'

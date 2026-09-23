@@ -53,7 +53,7 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="{{ route('gaji-induk-pppk.index') }}" class="nav-link {{ request()->is('gaji-induk-pppk*') ? 'active' : '' }}" style="font-size: 0.9em;">
+                        <a href="{{ route('gaji-induk-pppk.index') }}" class="nav-link {{ request()->is('gaji-induk-pppk', 'gaji-induk-pppk/*') ? 'active' : '' }}" style="font-size: 0.9em;">
                             <i class="fa-solid fa-circle-dot" style="font-size: 0.5em; margin-right: 8px;"></i> Gaji PPPK
                         </a>
                     </li>
@@ -66,7 +66,7 @@
             </div>
         </li>
         <li class="nav-item">
-            <a href="#" class="nav-link">
+            <a href="{{ route('tpp.index') }}" class="nav-link {{ request()->is('tpp*') ? 'active' : '' }}">
                 <i class="fa-solid fa-hand-holding-dollar"></i>
                 Tambahan Penghasilan (TPP)
             </a>
