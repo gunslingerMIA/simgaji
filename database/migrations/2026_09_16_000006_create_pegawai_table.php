@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('nik', 16);
             $table->string('npwp', 20)->nullable();
             $table->enum('jenis_kelamin', ['L', 'P']);
-            $table->enum('status_kepegawaian', ['pns', 'cpns', 'pppk']);
+            $table->enum('status_kepegawaian', ['pns', 'cpns', 'pppk', 'pppk_paruh_waktu']);
             $table->string('status_pernikahan');
             $table->string('golongan', 10);
             $table->integer('mkg_tahun');

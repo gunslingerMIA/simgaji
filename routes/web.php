@@ -5,6 +5,9 @@ use App\Http\Controllers\EarlyWarningController;
 use App\Http\Controllers\GajiIndukPnsController;
 use App\Http\Controllers\GajiIndukPppkController;
 use App\Http\Controllers\GajiIndukPppkParuhWaktuController;
+use App\Http\Controllers\GajiTambahanPnsController;
+use App\Http\Controllers\GajiTambahanPppkController;
+use App\Http\Controllers\GajiTambahanPppkParuhWaktuController;
 use App\Http\Controllers\JabatanController;
 use App\Http\Controllers\PaguAnggaranController;
 use App\Http\Controllers\PegawaiAnakController;
@@ -63,5 +66,17 @@ Route::post('tpp/lock', [TppController::class, 'lock'])->name('tpp.lock');
 Route::post('tpp/unlock', [TppController::class, 'unlock'])->name('tpp.unlock');
 Route::post('tpp/sync-historis', [TppController::class, 'syncHistoris'])->name('tpp.sync-historis');
 Route::resource('tpp', TppController::class)->only(['index', 'create', 'store', 'update', 'destroy']);
+
+Route::post('gaji-tambahan-pns/lock', [GajiTambahanPnsController::class, 'lock'])->name('gaji-tambahan-pns.lock');
+Route::post('gaji-tambahan-pns/unlock', [GajiTambahanPnsController::class, 'unlock'])->name('gaji-tambahan-pns.unlock');
+Route::resource('gaji-tambahan-pns', GajiTambahanPnsController::class)->only(['index', 'create', 'store', 'update', 'destroy']);
+
+Route::post('gaji-tambahan-pppk/lock', [GajiTambahanPppkController::class, 'lock'])->name('gaji-tambahan-pppk.lock');
+Route::post('gaji-tambahan-pppk/unlock', [GajiTambahanPppkController::class, 'unlock'])->name('gaji-tambahan-pppk.unlock');
+Route::resource('gaji-tambahan-pppk', GajiTambahanPppkController::class)->only(['index', 'create', 'store', 'update', 'destroy']);
+
+Route::post('gaji-tambahan-pppk-paruh-waktu/lock', [GajiTambahanPppkParuhWaktuController::class, 'lock'])->name('gaji-tambahan-pppk-paruh-waktu.lock');
+Route::post('gaji-tambahan-pppk-paruh-waktu/unlock', [GajiTambahanPppkParuhWaktuController::class, 'unlock'])->name('gaji-tambahan-pppk-paruh-waktu.unlock');
+Route::resource('gaji-tambahan-pppk-paruh-waktu', GajiTambahanPppkParuhWaktuController::class)->only(['index', 'create', 'store', 'update', 'destroy']);
 
 Route::get('early-warning', [EarlyWarningController::class, 'index'])->name('early-warning.index');

@@ -32,22 +32,40 @@ class PphTerCalculator
     }
 
     /**
-     * Calculate TER based on category and gross income (bruto).
+     * Get the TER rate percentage based on category and gross income (bruto).
      */
-    public static function calculate(string $category, float $bruto): float
+    public static function getRate(string $category, float $bruto): float
     {
-        $rate = 0;
-
         if ($category === 'A') {
-            $rate = self::getRateA($bruto);
+            return self::getRateA($bruto);
         } elseif ($category === 'B') {
-            $rate = self::getRateB($bruto);
+            return self::getRateB($bruto);
         } elseif ($category === 'C') {
-            $rate = self::getRateC($bruto);
+            return self::getRateC($bruto);
         }
 
-        // TER is applied directly to the bruto
-        return ceil($bruto * ($rate / 100));
+        return 0;
+    }
+
+    /**
+     * Calculate TER based on category and gross income (bruto).
+     *
+     * @param  string  $category  'A', 'B', or 'C'
+     * @param  string  $rounding  'ceil', 'round', or 'floor'
+     */
+    public static function calculate(string $category, float $bruto, string $rounding = 'ceil'): float
+    {
+        $rate = self::getRate($category, $bruto);
+        $val = $bruto * ($rate / 100);
+
+        if ($rounding === 'round') {
+            return round($val);
+        } elseif ($rounding === 'floor') {
+            return floor($val);
+        }
+
+        // TER default is applied directly to the bruto with ceil
+        return ceil($val);
     }
 
     private static function getRateA(float $bruto): float

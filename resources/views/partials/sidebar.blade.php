@@ -72,10 +72,11 @@
             </a>
         </li>
         <li class="nav-item">
-            <a href="#" class="nav-link">
+            <a href="{{ route('gaji-tambahan-pns.index') }}" class="nav-link {{ request()->is('gaji-tambahan*') ? 'active' : '' }}" aria-expanded="{{ request()->is('gaji-tambahan*') ? 'true' : 'false' }}">
                 <i class="fa-solid fa-gifts"></i>
                 Gaji 13 & 14 (THR)
             </a>
+            
         </li>
         <li class="nav-item">
             <a href="#" class="nav-link">

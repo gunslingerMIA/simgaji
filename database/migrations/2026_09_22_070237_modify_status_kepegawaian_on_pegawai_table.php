@@ -9,7 +9,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        DB::statement("ALTER TABLE pegawai MODIFY COLUMN status_kepegawaian ENUM('pns', 'cpns', 'pppk', 'pppk_paruh_waktu') NOT NULL");
+        if (DB::getDriverName() === 'mysql') {
+            DB::statement("ALTER TABLE pegawai MODIFY COLUMN status_kepegawaian ENUM('pns', 'cpns', 'pppk', 'pppk_paruh_waktu') NOT NULL");
+        }
     }
 
     /**
@@ -17,6 +19,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        DB::statement("ALTER TABLE pegawai MODIFY COLUMN status_kepegawaian ENUM('pns', 'cpns', 'pppk') NOT NULL");
+        if (DB::getDriverName() === 'mysql') {
+            DB::statement("ALTER TABLE pegawai MODIFY COLUMN status_kepegawaian ENUM('pns', 'cpns', 'pppk') NOT NULL");
+        }
     }
 };

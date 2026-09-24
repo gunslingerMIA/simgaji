@@ -75,16 +75,8 @@ class TppController extends Controller
         $gajiPnsMap = $gajiPnsSnapshots->keyBy('pegawai_id');
         $gajiPppkMap = $gajiPppkSnapshots->keyBy('pegawai_id');
 
-        // 3. Kumpulkan semua pegawai_id yang berhak di bulan ini
+        // 3. Kumpulkan semua pegawai yang tercatat aktif pada tanggal cut-off
         $pegawaiIds = collect();
-        foreach ($gajiPnsSnapshots as $g) {
-            $pegawaiIds->push($g->pegawai_id);
-        }
-        foreach ($gajiPppkSnapshots as $g) {
-            $pegawaiIds->push($g->pegawai_id);
-        }
-
-        // Tambahkan juga pegawai yang tercatat aktif pada tanggal cut-off
         foreach ($pegawaiList as $p) {
             $snap = $p->getSnapshotAtDate($tanggalCutOff);
             if ($snap['is_active'] && $snap['status_keaktifan'] === 'aktif' && in_array($snap['status_kepegawaian'], ['pns', 'cpns', 'pppk'])) {
@@ -101,15 +93,15 @@ class TppController extends Controller
             $gajiPppk = $gajiPppkMap[$pegawaiId] ?? null;
             $gajiSnapshot = $gajiPns ?? $gajiPppk;
 
-            if (! $pegawai && ! $gajiSnapshot) {
+            if (! $pegawai) {
                 continue;
             }
 
             // Ambil snapshot kepegawaian historis per tanggal cut-off
-            $snapshot = $pegawai ? $pegawai->getSnapshotAtDate($tanggalCutOff) : null;
+            $snapshot = $pegawai->getSnapshotAtDate($tanggalCutOff);
 
-            // Jika per tanggal tersebut pegawai nonaktif dan tidak ada di gaji snapshot, lewati
-            if ($snapshot && (! $snapshot['is_active'] || $snapshot['status_keaktifan'] !== 'aktif') && ! $gajiSnapshot) {
+            // Jika per tanggal tersebut pegawai nonaktif, lewati
+            if (! $snapshot['is_active'] || $snapshot['status_keaktifan'] !== 'aktif') {
                 continue;
             }
 
@@ -354,6 +346,13 @@ class TppController extends Controller
             }
 
             $snap = $pegawai->getSnapshotAtDate($tanggalCutOff);
+
+            if (! $snap['is_active'] || $snap['status_keaktifan'] !== 'aktif') {
+                $tpp->delete();
+                $updatedCount++;
+
+                continue;
+            }
 
             $statusKepegawaian = $snap['status_kepegawaian'];
             $golongan = $snap['golongan'];
