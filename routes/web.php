@@ -14,6 +14,7 @@ use App\Http\Controllers\PegawaiAnakController;
 use App\Http\Controllers\PegawaiController;
 use App\Http\Controllers\PegawaiPasanganController;
 use App\Http\Controllers\PegawaiRiwayatController;
+use App\Http\Controllers\RapelController;
 use App\Http\Controllers\RefGajiController;
 use App\Http\Controllers\TppController;
 use Illuminate\Support\Facades\Route;
@@ -78,5 +79,18 @@ Route::resource('gaji-tambahan-pppk', GajiTambahanPppkController::class)->only([
 Route::post('gaji-tambahan-pppk-paruh-waktu/lock', [GajiTambahanPppkParuhWaktuController::class, 'lock'])->name('gaji-tambahan-pppk-paruh-waktu.lock');
 Route::post('gaji-tambahan-pppk-paruh-waktu/unlock', [GajiTambahanPppkParuhWaktuController::class, 'unlock'])->name('gaji-tambahan-pppk-paruh-waktu.unlock');
 Route::resource('gaji-tambahan-pppk-paruh-waktu', GajiTambahanPppkParuhWaktuController::class)->only(['index', 'create', 'store', 'update', 'destroy']);
+
+// Rapel Gaji Routes
+Route::get('rapel/cetak-rekap', [RapelController::class, 'cetakRekap'])->name('rapel.cetak-rekap');
+Route::post('rapel/preview-individual', [RapelController::class, 'previewIndividual'])->name('rapel.preview.individual');
+Route::post('rapel/store-individual', [RapelController::class, 'storeIndividual'])->name('rapel.store.individual');
+Route::post('rapel/store-massal', [RapelController::class, 'storeMassal'])->name('rapel.store.massal');
+Route::post('rapel/{id}/add-detail', [RapelController::class, 'storeDetailRow'])->name('rapel.detail.store');
+Route::put('rapel/detail/{id}', [RapelController::class, 'updateDetail'])->name('rapel.detail.update');
+Route::delete('rapel/detail/{id}', [RapelController::class, 'destroyDetailRow'])->name('rapel.detail.destroy');
+Route::post('rapel/{id}/lock', [RapelController::class, 'lock'])->name('rapel.lock');
+Route::post('rapel/{id}/unlock', [RapelController::class, 'unlock'])->name('rapel.unlock');
+Route::get('rapel/{id}/cetak', [RapelController::class, 'cetak'])->name('rapel.cetak');
+Route::resource('rapel', RapelController::class)->only(['index', 'create', 'show', 'destroy']);
 
 Route::get('early-warning', [EarlyWarningController::class, 'index'])->name('early-warning.index');

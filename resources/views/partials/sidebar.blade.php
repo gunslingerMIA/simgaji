@@ -79,7 +79,7 @@
             
         </li>
         <li class="nav-item">
-            <a href="#" class="nav-link">
+            <a href="{{ route('rapel.index') }}" class="nav-link {{ request()->is('rapel*') ? 'active' : '' }}">
                 <i class="fa-solid fa-clock-rotate-left"></i>
                 Rapel Gaji
             </a>
