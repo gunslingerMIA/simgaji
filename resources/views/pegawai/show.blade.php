@@ -84,9 +84,11 @@
 
                 {{-- Action Buttons --}}
                 <div class="d-grid gap-2">
-                    <a href="{{ route('pegawai.kp4', $pegawai->id) }}" target="_blank" class="btn btn-primary btn-sm">
-                        <i class="fa-solid fa-print me-1"></i> Cetak KP4
-                    </a>
+                    @if($pegawai->status_kepegawaian !== 'pppk_paruh_waktu')
+                        <a href="{{ route('pegawai.kp4', $pegawai->id) }}" target="_blank" class="btn btn-primary btn-sm">
+                            <i class="fa-solid fa-print me-1"></i> Cetak KP4
+                        </a>
+                    @endif
                     <a href="{{ route('pegawai.edit', $pegawai->id) }}" class="btn btn-warning btn-sm text-dark">
                         <i class="fa-solid fa-pen-to-square me-1"></i> Edit Data Utama
                     </a>
@@ -120,11 +122,11 @@
                     <table class="table table-hover align-middle mb-0" style="font-size: 0.9em;">
                         <thead class="table-light">
                             <tr>
-                                <th>TMT Berlaku</th>
+                                <th>TMT / Event</th>
                                 <th>Jabatan &amp; Kelas</th>
-                                <th>Status / Gol</th>
+                                <th>Status / Gol / MKG</th>
                                 <th>Keaktifan</th>
-                                <th>Keterangan / No. SK</th>
+                                <th>Dokumen SK &amp; Keterangan</th>
                                 <th class="text-center" width="100px">Aksi</th>
                             </tr>
                         </thead>
@@ -133,7 +135,9 @@
                             <tr>
                                 <td>
                                     <div class="fw-bold text-dark">{{ $riw->tmt_berlaku ? $riw->tmt_berlaku->format('d/m/Y') : '-' }}</div>
-                                    <small class="text-muted">{{ $riw->tmt_berlaku ? $riw->tmt_berlaku->diffForHumans() : '' }}</small>
+                                    <span class="badge {{ $riw->jenis_riwayat_badge_class }} rounded-pill" style="font-size: 0.75rem;">
+                                        {{ $riw->jenis_riwayat_label }}
+                                    </span>
                                 </td>
                                 <td>
                                     <strong>{{ $riw->jabatan ? $riw->jabatan->nama_jabatan : '-' }}</strong>
@@ -149,7 +153,10 @@
                                 <td>
                                     <div><span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25">{{ strtoupper(str_replace('_', ' ', $riw->status_kepegawaian)) }}</span></div>
                                     @if($riw->golongan)
-                                        <small class="text-muted">Gol. {{ $riw->golongan }}</small>
+                                        <div class="small fw-semibold text-dark">Gol. {{ $riw->golongan }}</div>
+                                    @endif
+                                    @if($riw->mkg_tahun !== null)
+                                        <div class="small text-muted">MKG: {{ $riw->mkg_tahun }} Thn {{ $riw->mkg_bulan ?? 0 }} Bln</div>
                                     @endif
                                 </td>
                                 <td>
@@ -162,9 +169,17 @@
                                     @endif
                                 </td>
                                 <td>
-                                    <div>{{ $riw->keterangan ?? '-' }}</div>
                                     @if($riw->nomor_sk)
-                                        <small class="text-muted">SK: {{ $riw->nomor_sk }}</small>
+                                        <div class="fw-semibold small"><i class="fa-solid fa-file-contract text-primary me-1"></i>{{ $riw->nomor_sk }}</div>
+                                    @endif
+                                    @if($riw->tanggal_sk)
+                                        <div class="small text-muted">Tgl SK: {{ $riw->tanggal_sk->format('d/m/Y') }} {{ $riw->pejabat_penetap ? '('.$riw->pejabat_penetap.')' : '' }}</div>
+                                    @endif
+                                    <div class="small text-muted">{{ $riw->keterangan ?? '-' }}</div>
+                                    @if($riw->file_sk)
+                                        <a href="{{ asset('storage/'.$riw->file_sk) }}" target="_blank" class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25 text-decoration-none mt-1">
+                                            <i class="fa-solid fa-file-pdf me-1"></i>Lihat Dokumen SK
+                                        </a>
                                     @endif
                                 </td>
                                 <td class="text-center">
@@ -625,18 +640,26 @@
         <h5 class="modal-title fw-bold"><i class="fa-solid fa-timeline me-2 text-primary"></i>Tambah Riwayat Kepegawaian</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
-      <form action="{{ route('pegawai.riwayat.store', $pegawai->id) }}" method="POST">
+      <form action="{{ route('pegawai.riwayat.store', $pegawai->id) }}" method="POST" enctype="multipart/form-data">
           @csrf
           <div class="modal-body">
               <div class="row">
                   <div class="col-md-6 mb-3">
-                      <label class="form-label fw-semibold">Tanggal Mulai Berlaku (TMT) <span class="text-danger">*</span></label>
-                      <input type="date" name="tmt_berlaku" class="form-control" required value="{{ date('Y-m-d') }}">
-                      <small class="text-muted">Tanggal berlakunya SK / jabatan / status ini.</small>
+                      <label class="form-label fw-semibold">Jenis Riwayat / Event <span class="text-danger">*</span></label>
+                      <select name="jenis_riwayat" class="form-select" required>
+                          <option value="kenaikan_pangkat">Kenaikan Pangkat (KP)</option>
+                          <option value="kgb">Kenaikan Gaji Berkala (KGB)</option>
+                          <option value="mutasi_jabatan">Mutasi / Promosi Jabatan</option>
+                          <option value="pengangkatan_awal">Pengangkatan Awal / CPNS</option>
+                          <option value="penyetaraan">Penyetaraan Jabatan</option>
+                          <option value="perubahan_status">Perubahan Status Keaktifan</option>
+                          <option value="lainnya">Lainnya</option>
+                      </select>
                   </div>
                   <div class="col-md-6 mb-3">
-                      <label class="form-label fw-semibold">Nomor SK / Dokumen</label>
-                      <input type="text" name="nomor_sk" class="form-control" placeholder="Contoh: 821.2/01/BKPSDM/2026">
+                      <label class="form-label fw-semibold">Tanggal Mulai Berlaku (TMT) <span class="text-danger">*</span></label>
+                      <input type="date" name="tmt_berlaku" class="form-control" required value="{{ date('Y-m-d') }}">
+                      <small class="text-muted">Tanggal TMT berlakunya SK ini.</small>
                   </div>
               </div>
 
@@ -678,21 +701,54 @@
                   </div>
               </div>
 
-              <div class="mb-3">
+              <div class="row">
+                  <div class="col-md-6 mb-3">
+                      <label class="form-label fw-semibold">Masa Kerja Golongan (Tahun)</label>
+                      <input type="number" name="mkg_tahun" class="form-control" min="0" value="{{ $pegawai->mkg_tahun }}" placeholder="Tahun (sesuai SK)">
+                  </div>
+                  <div class="col-md-6 mb-3">
+                      <label class="form-label fw-semibold">Masa Kerja Golongan (Bulan)</label>
+                      <input type="number" name="mkg_bulan" class="form-control" min="0" max="11" value="{{ $pegawai->mkg_bulan ?? 0 }}" placeholder="Bulan (0-11)">
+                  </div>
+              </div>
+
+              <div class="row">
+                  <div class="col-md-4 mb-3">
+                      <label class="form-label fw-semibold">Nomor SK</label>
+                      <input type="text" name="nomor_sk" class="form-control" placeholder="Contoh: 821.2/01/2026">
+                  </div>
+                  <div class="col-md-4 mb-3">
+                      <label class="form-label fw-semibold">Tanggal SK</label>
+                      <input type="date" name="tanggal_sk" class="form-control">
+                  </div>
+                  <div class="col-md-4 mb-3">
+                      <label class="form-label fw-semibold">Pejabat Penetap</label>
+                      <input type="text" name="pejabat_penetap" class="form-control" placeholder="Contoh: Walikota Pekalongan">
+                  </div>
+              </div>
+
+              <div class="row">
+                  <div class="col-md-6 mb-3">
+                      <label class="form-label fw-semibold">Upload Dokumen SK (PDF / Gambar)</label>
+                      <input type="file" name="file_sk" class="form-control" accept=".pdf,.jpg,.jpeg,.png">
+                      <small class="text-muted">Maksimal 5MB.</small>
+                  </div>
+                  <div class="col-md-6 mb-3">
+                      <label class="form-label fw-semibold">Keterangan Tambahan</label>
+                      <input type="text" name="keterangan" class="form-control" placeholder="Contoh: Naik Pangkat Reguler, KGB ke-3">
+                  </div>
+              </div>
+
+              <div class="mb-2">
                   <div class="form-check">
                       <input class="form-check-input" type="checkbox" name="is_penyetaraan" id="riwayat_penyetaraan" value="1" {{ $pegawai->is_penyetaraan ? 'checked' : '' }}>
                       <label class="form-check-label fw-semibold" for="riwayat_penyetaraan">Jabatan Penyetaraan</label>
                   </div>
               </div>
-
-              <div class="mb-3">
-                  <label class="form-label fw-semibold">Keterangan / Alasan Perubahan</label>
-                  <input type="text" name="keterangan" class="form-control" placeholder="Contoh: Pengangkatan CPNS, Pelantikan Sekretaris, Kenaikan Pangkat">
-              </div>
           </div>
           <div class="modal-footer border-top-0">
             <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
-            <button type="submit" class="btn btn-primary">Simpan Riwayat</button>
+            <button type="submit" class="btn btn-primary">Simpan &amp; Sinkronkan</button>
           </div>
       </form>
     </div>
@@ -707,18 +763,26 @@
         <h5 class="modal-title fw-bold"><i class="fa-solid fa-pen-to-square me-2 text-warning"></i>Edit Riwayat Kepegawaian</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
-      <form id="formEditRiwayat" method="POST">
+      <form id="formEditRiwayat" method="POST" enctype="multipart/form-data">
           @csrf
           @method('PUT')
           <div class="modal-body">
               <div class="row">
                   <div class="col-md-6 mb-3">
-                      <label class="form-label fw-semibold">Tanggal Mulai Berlaku (TMT) <span class="text-danger">*</span></label>
-                      <input type="date" name="tmt_berlaku" id="edit_riw_tmt_berlaku" class="form-control" required>
+                      <label class="form-label fw-semibold">Jenis Riwayat / Event <span class="text-danger">*</span></label>
+                      <select name="jenis_riwayat" id="edit_riw_jenis_riwayat" class="form-select" required>
+                          <option value="kenaikan_pangkat">Kenaikan Pangkat (KP)</option>
+                          <option value="kgb">Kenaikan Gaji Berkala (KGB)</option>
+                          <option value="mutasi_jabatan">Mutasi / Promosi Jabatan</option>
+                          <option value="pengangkatan_awal">Pengangkatan Awal / CPNS</option>
+                          <option value="penyetaraan">Penyetaraan Jabatan</option>
+                          <option value="perubahan_status">Perubahan Status Keaktifan</option>
+                          <option value="lainnya">Lainnya</option>
+                      </select>
                   </div>
                   <div class="col-md-6 mb-3">
-                      <label class="form-label fw-semibold">Nomor SK / Dokumen</label>
-                      <input type="text" name="nomor_sk" id="edit_riw_nomor_sk" class="form-control">
+                      <label class="form-label fw-semibold">Tanggal Mulai Berlaku (TMT) <span class="text-danger">*</span></label>
+                      <input type="date" name="tmt_berlaku" id="edit_riw_tmt_berlaku" class="form-control" required>
                   </div>
               </div>
 
@@ -760,21 +824,54 @@
                   </div>
               </div>
 
-              <div class="mb-3">
+              <div class="row">
+                  <div class="col-md-6 mb-3">
+                      <label class="form-label fw-semibold">Masa Kerja Golongan (Tahun)</label>
+                      <input type="number" name="mkg_tahun" id="edit_riw_mkg_tahun" class="form-control" min="0" placeholder="Tahun (sesuai SK)">
+                  </div>
+                  <div class="col-md-6 mb-3">
+                      <label class="form-label fw-semibold">Masa Kerja Golongan (Bulan)</label>
+                      <input type="number" name="mkg_bulan" id="edit_riw_mkg_bulan" class="form-control" min="0" max="11" placeholder="Bulan (0-11)">
+                  </div>
+              </div>
+
+              <div class="row">
+                  <div class="col-md-4 mb-3">
+                      <label class="form-label fw-semibold">Nomor SK</label>
+                      <input type="text" name="nomor_sk" id="edit_riw_nomor_sk" class="form-control">
+                  </div>
+                  <div class="col-md-4 mb-3">
+                      <label class="form-label fw-semibold">Tanggal SK</label>
+                      <input type="date" name="tanggal_sk" id="edit_riw_tanggal_sk" class="form-control">
+                  </div>
+                  <div class="col-md-4 mb-3">
+                      <label class="form-label fw-semibold">Pejabat Penetap</label>
+                      <input type="text" name="pejabat_penetap" id="edit_riw_pejabat_penetap" class="form-control">
+                  </div>
+              </div>
+
+              <div class="row">
+                  <div class="col-md-6 mb-3">
+                      <label class="form-label fw-semibold">Upload Dokumen SK Baru (Opsional)</label>
+                      <input type="file" name="file_sk" class="form-control" accept=".pdf,.jpg,.jpeg,.png">
+                      <small class="text-muted">Kosongkan jika tidak ingin mengubah file SK.</small>
+                  </div>
+                  <div class="col-md-6 mb-3">
+                      <label class="form-label fw-semibold">Keterangan Tambahan</label>
+                      <input type="text" name="keterangan" id="edit_riw_keterangan" class="form-control">
+                  </div>
+              </div>
+
+              <div class="mb-2">
                   <div class="form-check">
                       <input class="form-check-input" type="checkbox" name="is_penyetaraan" id="edit_riw_is_penyetaraan" value="1">
                       <label class="form-check-label fw-semibold" for="edit_riw_is_penyetaraan">Jabatan Penyetaraan</label>
                   </div>
               </div>
-
-              <div class="mb-3">
-                  <label class="form-label fw-semibold">Keterangan / Alasan Perubahan</label>
-                  <input type="text" name="keterangan" id="edit_riw_keterangan" class="form-control">
-              </div>
           </div>
           <div class="modal-footer border-top-0">
             <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
-            <button type="submit" class="btn btn-warning">Update Riwayat</button>
+            <button type="submit" class="btn btn-warning">Update &amp; Sinkronkan</button>
           </div>
       </form>
     </div>
@@ -802,8 +899,13 @@
             btn.addEventListener('click', function() {
                 let data = JSON.parse(this.getAttribute('data-riwayat'));
                 document.getElementById('formEditRiwayat').action = '/pegawai/riwayat/' + data.id;
+                document.getElementById('edit_riw_jenis_riwayat').value = data.jenis_riwayat ?? 'kenaikan_pangkat';
                 document.getElementById('edit_riw_tmt_berlaku').value = data.tmt_berlaku ? data.tmt_berlaku.substring(0, 10) : '';
                 document.getElementById('edit_riw_nomor_sk').value = data.nomor_sk ?? '';
+                document.getElementById('edit_riw_tanggal_sk').value = data.tanggal_sk ? data.tanggal_sk.substring(0, 10) : '';
+                document.getElementById('edit_riw_pejabat_penetap').value = data.pejabat_penetap ?? '';
+                document.getElementById('edit_riw_mkg_tahun').value = data.mkg_tahun ?? '';
+                document.getElementById('edit_riw_mkg_bulan').value = data.mkg_bulan ?? '';
                 document.getElementById('edit_riw_ref_jabatan_id').value = data.ref_jabatan_id ?? '';
                 document.getElementById('edit_riw_status_kepegawaian').value = data.status_kepegawaian ?? 'pns';
                 document.getElementById('edit_riw_golongan').value = data.golongan ?? '';

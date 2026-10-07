@@ -2,64 +2,85 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\GajiIndukPns;
+use App\Models\GajiIndukPppk;
+use App\Models\GajiIndukPppkParuhWaktu;
 use App\Models\Pegawai;
 use App\Models\PegawaiAnak;
+use App\Models\Tpp;
 use App\Services\BudgetProjectionService;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
-    protected $projectionService;
-
-    public function __construct(BudgetProjectionService $projectionService)
-    {
-        $this->projectionService = $projectionService;
-    }
+    public function __construct(
+        protected BudgetProjectionService $projectionService
+    ) {}
 
     public function index()
     {
-        $currentMonth = date('n');
+        $currentMonth = (int) date('n');
+        $currentMonthPad = str_pad((string) $currentMonth, 2, '0', STR_PAD_LEFT);
         $currentYear = date('Y');
 
         // Total Pegawai Aktif
         $totalPegawai = Pegawai::where('is_active', true)->count();
 
         // Gaji Induk Bulan Ini
-        $periodeGajiInduk = DB::table('payroll_periode')
-            ->where('bulan', $currentMonth)
-            ->where('tahun', $currentYear)
-            ->where('jenis', 'gaji_induk')
-            ->first();
+        $gajiPns = GajiIndukPns::where('bulan', $currentMonthPad)->where('tahun', $currentYear)->get();
+        $gajiPppk = GajiIndukPppk::where('bulan', $currentMonthPad)->where('tahun', $currentYear)->get();
+        $gajiPppkPw = GajiIndukPppkParuhWaktu::where('bulan', $currentMonthPad)->where('tahun', $currentYear)->get();
 
-        $gajiIndukTotal = 0;
-        if ($periodeGajiInduk) {
-            $gajiIndukTotal = DB::table('payroll_gaji_induk')
-                ->where('payroll_periode_id', $periodeGajiInduk->id)
-                ->sum('penghasilan_bruto');
-        }
+        $gajiIndukTotal = $gajiPns->sum('kotor_resmi') + $gajiPppk->sum('kotor_resmi') + $gajiPppkPw->sum('gaji_pokok');
+
+        $isGajiLocked = ($gajiPns->count() > 0 && $gajiPns->first()->is_locked) ||
+                        ($gajiPppk->count() > 0 && $gajiPppk->first()->is_locked);
+        $hasGaji = ($gajiPns->count() > 0 || $gajiPppk->count() > 0 || $gajiPppkPw->count() > 0);
+
+        $periodeGajiInduk = $hasGaji ? (object) ['is_locked' => $isGajiLocked] : null;
 
         // TPP Bulan Ini
-        $periodeTpp = DB::table('payroll_periode')
-            ->where('bulan', $currentMonth)
-            ->where('tahun', $currentYear)
-            ->where('jenis', 'tpp')
-            ->first();
+        $tppData = Tpp::where('bulan', $currentMonthPad)->where('tahun', $currentYear)->get();
+        $tppTotal = (float) $tppData->sum('tpp_kotor');
+        $isTppLocked = ($tppData->count() > 0 && $tppData->first()->is_locked);
+        $hasTpp = ($tppData->count() > 0);
 
-        $tppTotal = 0;
-        if ($periodeTpp) {
-            $tppTotal = DB::table('payroll_tpp')
-                ->where('payroll_periode_id', $periodeTpp->id)
-                ->sum('tpp_kotor');
-        }
+        $periodeTpp = $hasTpp ? (object) ['is_locked' => $isTppLocked] : null;
 
         // Aktivitas Penggajian Terakhir
-        $aktivitas = DB::table('payroll_periode')
-            ->orderBy('tahun', 'desc')
-            ->orderBy('bulan', 'desc')
-            ->orderBy('created_at', 'desc')
-            ->take(5)
-            ->get();
+        $aktivitas = collect();
+
+        // Ambil data periode gaji PNS
+        $pnsPeriods = GajiIndukPns::select('bulan', 'tahun', 'is_locked', 'updated_at')
+            ->groupBy('bulan', 'tahun', 'is_locked', 'updated_at')
+            ->orderByDesc('tahun')
+            ->orderByDesc('bulan')
+            ->take(3)
+            ->get()
+            ->map(fn ($item) => (object) [
+                'bulan' => (int) $item->bulan,
+                'tahun' => (int) $item->tahun,
+                'jenis' => 'gaji_induk',
+                'is_locked' => (bool) $item->is_locked,
+                'locked_at' => $item->is_locked ? $item->updated_at : null,
+            ]);
+
+        // Ambil data periode TPP
+        $tppPeriods = Tpp::select('bulan', 'tahun', 'is_locked', 'updated_at')
+            ->groupBy('bulan', 'tahun', 'is_locked', 'updated_at')
+            ->orderByDesc('tahun')
+            ->orderByDesc('bulan')
+            ->take(3)
+            ->get()
+            ->map(fn ($item) => (object) [
+                'bulan' => (int) $item->bulan,
+                'tahun' => (int) $item->tahun,
+                'jenis' => 'tpp',
+                'is_locked' => (bool) $item->is_locked,
+                'locked_at' => $item->is_locked ? $item->updated_at : null,
+            ]);
+
+        $aktivitas = $pnsPeriods->concat($tppPeriods)->sortByDesc(fn ($i) => $i->tahun * 100 + $i->bulan)->take(5)->values();
 
         // Peringatan EWS
         $alerts = [];

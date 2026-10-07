@@ -12,7 +12,13 @@
                         <h4 class="mb-1 text-primary"><i class="fa-solid fa-money-check-dollar me-2"></i>Data Gaji Induk PPPK Penuh Waktu</h4>
                         <p class="text-muted small mb-0">Menampilkan data gaji induk untuk bulan {{ str_pad($bulan, 2, '0', STR_PAD_LEFT) }} tahun {{ $tahun }}.</p>
                     </div>
-                    <div>
+                    <div class="d-flex gap-2 flex-wrap align-items-center">
+                        <a href="{{ route('gaji-induk-pppk.pemindahbukuan.index', ['bulan' => $bulan, 'tahun' => $tahun]) }}" class="btn btn-outline-primary fw-semibold">
+                            <i class="fa-solid fa-building-columns me-1"></i> Pemindahbukuan Rekening
+                        </a>
+                        <a href="{{ route('gaji-induk-pppk.slip.all', ['bulan' => $bulan, 'tahun' => $tahun]) }}" target="_blank" class="btn btn-outline-info fw-semibold">
+                            <i class="fa-solid fa-receipt me-1"></i> Slip Gaji
+                        </a>
                         <a href="{{ route('gaji-induk-pppk.create') }}" class="btn btn-primary">
                             <i class="fa-solid fa-plus me-1"></i> Generate Gaji
                         </a>

@@ -18,6 +18,7 @@ class PayrollRapel extends Model
         'is_locked' => 'boolean',
         'bulan_bayar' => 'integer',
         'tahun_bayar' => 'integer',
+        'jumlah_bulan' => 'integer',
         'total_rapel_bruto' => 'float',
         'total_rapel_potongan' => 'float',
         'total_rapel_netto' => 'float',
@@ -31,5 +32,18 @@ class PayrollRapel extends Model
     public function details()
     {
         return $this->hasMany(PayrollRapelDetail::class, 'payroll_rapel_id');
+    }
+
+    public function getNamaDisplayAttribute(): string
+    {
+        if (! empty($this->nama_pengajuan)) {
+            return $this->nama_pengajuan;
+        }
+
+        $jenis = strtoupper($this->jenis_rapel ?? 'RAPEL');
+        $status = strtoupper($this->status_kepegawaian ?? '');
+        $sk = $this->nomor_sk ? " - SK: {$this->nomor_sk}" : '';
+
+        return "Pengajuan Rapel {$jenis} {$status}{$sk}";
     }
 }

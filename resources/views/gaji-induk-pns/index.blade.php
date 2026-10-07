@@ -13,7 +13,13 @@
                         <h4 class="mb-1 text-primary"><i class="fa-solid fa-money-check-dollar me-2"></i>Data Gaji Induk PNS</h4>
                         <p class="text-muted small mb-0">Menampilkan data gaji induk untuk bulan {{ str_pad($bulan, 2, '0', STR_PAD_LEFT) }} tahun {{ $tahun }}.</p>
                     </div>
-                    <div>
+                    <div class="d-flex gap-2 flex-wrap align-items-center">
+                        <a href="{{ route('gaji-induk-pns.pemindahbukuan.index', ['bulan' => $bulan, 'tahun' => $tahun]) }}" class="btn btn-outline-primary fw-semibold">
+                            <i class="fa-solid fa-building-columns me-1"></i> Pemindahbukuan Rekening
+                        </a>
+                        <a href="{{ route('gaji-induk-pns.slip.all', ['bulan' => $bulan, 'tahun' => $tahun]) }}" target="_blank" class="btn btn-outline-info fw-semibold">
+                            <i class="fa-solid fa-receipt me-1"></i> Slip Gaji
+                        </a>
                         <a href="{{ route('gaji-induk-pns.create') }}" class="btn btn-primary">
                             <i class="fa-solid fa-plus me-1"></i> Generate Gaji
                         </a>
@@ -223,20 +229,23 @@
                                         <!-- Bersih -->
                                         <td class="text-end fw-bold text-success bg-success bg-opacity-10 fs-6">{{ number_format($gaji->bersih_resmi, 0, ',', '.') }}</td>
                                         <td class="text-center">
-                                            @if(!$isLocked)
-                                            <button type="button" class="btn btn-sm btn-outline-primary btn-edit-tunjangan"
-                                                data-id="{{ $gaji->id }}"
-                                                data-nama="{{ $gaji->nama }}"
-                                                data-struktural="{{ $gaji->tunjangan_jabatan }}"
-                                                data-fungsional="{{ $gaji->tunjangan_fungsional }}"
-                                                data-umum="{{ $gaji->tunjangan_umum }}"
-                                                data-pph="{{ $gaji->tunjangan_pph }}"
-                                                title="Edit Manual Tunjangan">
-                                                <i class="fa-solid fa-pen"></i>
-                                            </button>
-                                            @else
-                                            -
-                                            @endif
+                                            <div class="btn-group btn-group-sm">
+                                                <a href="{{ route('gaji-induk-pns.slip', $gaji->id) }}" target="_blank" class="btn btn-outline-info" title="Cetak Slip Gaji">
+                                                    <i class="fa-solid fa-receipt"></i>
+                                                </a>
+                                                @if(!$isLocked)
+                                                    <button type="button" class="btn btn-outline-primary btn-edit-tunjangan"
+                                                        data-id="{{ $gaji->id }}"
+                                                        data-nama="{{ $gaji->nama }}"
+                                                        data-struktural="{{ $gaji->tunjangan_jabatan }}"
+                                                        data-fungsional="{{ $gaji->tunjangan_fungsional }}"
+                                                        data-umum="{{ $gaji->tunjangan_umum }}"
+                                                        data-pph="{{ $gaji->tunjangan_pph }}"
+                                                        title="Edit Manual Tunjangan">
+                                                        <i class="fa-solid fa-pen"></i>
+                                                    </button>
+                                                @endif
+                                            </div>
                                         </td>
                                     </tr>
                                 @empty

@@ -75,9 +75,13 @@
         <h6 class="mb-0 fw-bold text-uppercase">PEMERINTAH KOTA PEKALONGAN</h6>
         <h5 class="mb-0 fw-bold text-uppercase">DAFTAR PERHITUNGAN PEMBAYARAN RAPEL GAJI</h5>
         <div class="small fw-semibold">
+            @if(isset($rapel))
+                <span class="fs-6 text-dark fw-bold">{{ $rapel->nama_display }}</span> &bull;
+            @endif
             Tahun Anggaran {{ $tahun }} 
             @if($bulan) - Bulan Bayar: {{ str_pad($bulan, 2, '0', STR_PAD_LEFT) }}/{{ $tahun }} @endif
             @if($status !== 'all') &bull; Status: {{ strtoupper($status) }} @endif
+            @if(isset($rapel) && $rapel->jumlah_bulan) &bull; Durasi: {{ $rapel->jumlah_bulan }} Bulan @endif
         </div>
     </div>
     <div class="header-line"></div>

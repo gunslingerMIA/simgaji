@@ -93,11 +93,32 @@ class PegawaiController extends Controller
         $validated['is_active'] = $request->has('is_active');
         $validated['is_penyetaraan'] = $request->boolean('is_penyetaraan');
         $validated['npwp'] = $validated['nik'];
+        $validated['mkg_tahun'] = $validated['mkg_tahun'] ?? 0;
+        $validated['mkg_bulan'] = $validated['mkg_bulan'] ?? 0;
+        $validated['tmt_pangkat_terakhir'] = $validated['tmt_pangkat_terakhir'] ?? ($validated['tmt_pns'] ?? ($validated['tmt_cpns'] ?? now()));
+        $validated['tmt_kgb_terakhir'] = $validated['tmt_kgb_terakhir'] ?? $validated['tmt_pangkat_terakhir'];
 
         $pegawai = Pegawai::create($validated);
 
+        // Buat riwayat pengangkatan awal otomatis sebagai single source of truth
+        $tmtAwal = $pegawai->tmt_cpns ?: ($pegawai->tmt_pns ?: ($pegawai->tmt_pangkat_terakhir ?: now()));
+        $pegawai->riwayat()->create([
+            'jenis_riwayat' => 'pengangkatan_awal',
+            'ref_jabatan_id' => $pegawai->ref_jabatan_id,
+            'status_kepegawaian' => $pegawai->status_kepegawaian,
+            'golongan' => $pegawai->golongan,
+            'mkg_tahun' => $pegawai->mkg_tahun,
+            'mkg_bulan' => $pegawai->mkg_bulan,
+            'is_penyetaraan' => $pegawai->is_penyetaraan,
+            'is_active' => $pegawai->is_active,
+            'status_keaktifan' => 'aktif',
+            'gaji_kontrak' => $pegawai->gaji_kontrak,
+            'tmt_berlaku' => $tmtAwal,
+            'keterangan' => 'Pengangkatan Awal / Entri Awal Sistem',
+        ]);
+
         return redirect()->route('pegawai.show', $pegawai->id)
-            ->with('success', 'Data Pegawai berhasil ditambahkan. Silakan lengkapi data keluarga.');
+            ->with('success', 'Data Pegawai & Riwayat Awal berhasil ditambahkan. Silakan lengkapi data keluarga.');
     }
 
     /**
@@ -303,7 +324,7 @@ class PegawaiController extends Controller
      */
     public function apiDetail(string $id)
     {
-        $pegawai = Pegawai::with(['jabatan', 'pasangan', 'anak'])->findOrFail($id);
+        $pegawai = Pegawai::with(['jabatan', 'pasangan', 'anak', 'riwayat.jabatan'])->findOrFail($id);
 
         $now = Carbon::now();
         // Base on TMT KGB if available, else TMT Pangkat
@@ -378,7 +399,10 @@ class PegawaiController extends Controller
      */
     public function indexKp4()
     {
-        $pegawais = Pegawai::where('is_active', true)->get();
+        $pegawais = Pegawai::where('is_active', true)
+            ->whereIn('status_kepegawaian', ['pns', 'cpns', 'pppk'])
+            ->orderBy('nama_lengkap', 'asc')
+            ->get();
 
         return view('cetak_kp4.index', compact('pegawais'));
     }
@@ -390,63 +414,49 @@ class PegawaiController extends Controller
     {
         $pegawai = Pegawai::with(['jabatan', 'pasangan', 'anak'])->findOrFail($id);
 
-        $tanggalKp4 = $request->input('tanggal_kp4') ? Carbon::parse($request->input('tanggal_kp4')) : Carbon::now();
-        $now = $tanggalKp4;
-
-        $tmt = $pegawai->tmt_kgb_terakhir ?? $pegawai->tmt_pangkat_terakhir;
-
-        $diffInMonths = 0;
-        if ($tmt) {
-            $tmtDate = Carbon::parse($tmt);
-            if ($now->greaterThan($tmtDate)) {
-                $diffInMonths = $tmtDate->diffInMonths($now);
-            }
+        if ($pegawai->status_kepegawaian === 'pppk_paruh_waktu') {
+            abort(404, 'Form KP4 tidak tersedia untuk PPPK Paruh Waktu.');
         }
 
-        $totalMonths = ((int) $pegawai->mkg_tahun * 12) + (int) $pegawai->mkg_bulan + $diffInMonths;
-        $currentMkgTahun = floor($totalMonths / 12);
+        $tanggalKp4 = $request->input('tanggal_kp4') ? Carbon::parse($request->input('tanggal_kp4')) : Carbon::now();
 
-        $mkgTambahanTahun = floor($diffInMonths / 12);
-        $mkgTambahanBulan = $diffInMonths % 12;
-
-        $mkgSeluruhnyaTahun = floor($totalMonths / 12);
-        $mkgSeluruhnyaBulan = $totalMonths % 12;
+        $hist = $pegawai->getHistoricalDataAt($tanggalKp4);
+        $currentMkgTahun = $hist['mkg_tahun'];
+        $golongan = $hist['golongan'] ?: $pegawai->golongan;
+        $statusKepegawaian = $hist['status_kepegawaian'] ?: $pegawai->status_kepegawaian;
 
         $gajiPokok = 0;
-        if (in_array($pegawai->status_kepegawaian, ['pns', 'cpns'])) {
-            $refGaji = RefGajiPokokPns::where('golongan', $pegawai->golongan)
+        if (in_array($statusKepegawaian, ['pns', 'cpns'])) {
+            $refGaji = RefGajiPokokPns::where('golongan', $golongan)
                 ->where('mkg', '<=', (int) $currentMkgTahun)
                 ->orderBy('mkg', 'desc')
                 ->first();
             if (! $refGaji) {
-                $refGaji = RefGajiPokokPns::where('golongan', $pegawai->golongan)
+                $refGaji = RefGajiPokokPns::where('golongan', $golongan)
                     ->orderBy('mkg', 'asc')
                     ->first();
             }
             $gajiPokok = $refGaji ? $refGaji->nominal : 0;
-            if ($pegawai->status_kepegawaian === 'cpns') {
+            if ($statusKepegawaian === 'cpns') {
                 $gajiPokok = $gajiPokok * 0.8;
             }
-        } elseif ($pegawai->status_kepegawaian === 'pppk') {
-            $refGaji = RefGajiPokokPppk::where('golongan', $pegawai->golongan)
+        } elseif ($statusKepegawaian === 'pppk') {
+            $refGaji = RefGajiPokokPppk::where('golongan', $golongan)
                 ->where('mkg', '<=', (int) $currentMkgTahun)
                 ->orderBy('mkg', 'desc')
                 ->first();
             if (! $refGaji) {
-                $refGaji = RefGajiPokokPppk::where('golongan', $pegawai->golongan)
+                $refGaji = RefGajiPokokPppk::where('golongan', $golongan)
                     ->orderBy('mkg', 'asc')
                     ->first();
             }
             $gajiPokok = $refGaji ? $refGaji->nominal : 0;
-        } elseif ($pegawai->status_kepegawaian === 'pppk_paruh_waktu') {
-            $gajiPokok = $pegawai->gaji_kontrak;
         }
 
         $unitKerja = 'Dinas Penanaman Modal dan Pelayanan Terpadu Satu Pintu Kota Pekalongan';
 
         return view('pegawai.kp4', compact(
-            'pegawai', 'gajiPokok', 'currentMkgTahun', 'unitKerja',
-            'mkgTambahanTahun', 'mkgTambahanBulan', 'mkgSeluruhnyaTahun', 'mkgSeluruhnyaBulan',
+            'pegawai', 'hist', 'gajiPokok', 'currentMkgTahun', 'unitKerja',
             'tanggalKp4'
         ));
     }

@@ -1,5 +1,33 @@
 @extends('layouts.app')
 
+@push('styles')
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
+<style>
+    .card-filter-kp4 {
+        position: relative;
+        z-index: 1050;
+        overflow: visible !important;
+    }
+    .card-filter-kp4 .card-body {
+        overflow: visible !important;
+    }
+    .choices {
+        margin-bottom: 0;
+    }
+    .choices .choices__list--dropdown,
+    .choices[data-type*="select-one"] .choices__list--dropdown,
+    .choices__list[aria-expanded] {
+        z-index: 99999 !important;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.18) !important;
+        background-color: #ffffff !important;
+        max-height: 320px !important;
+    }
+    .choices__list--dropdown .choices__item--selectable {
+        padding-right: 15px !important;
+    }
+</style>
+@endpush
+
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
@@ -8,7 +36,7 @@
     </div>
 </div>
 
-<div class="card shadow-sm border-0 mb-4">
+<div class="card shadow-sm border-0 mb-4 card-filter-kp4">
     <div class="card-body">
         <form id="formCetakKp4" class="row g-3 align-items-end">
             <div class="col-md-4">
@@ -16,11 +44,11 @@
                 <input type="date" class="form-control" id="tanggal_kp4" name="tanggal_kp4" value="{{ date('Y-01-01') }}" required>
             </div>
             <div class="col-md-6">
-                <label for="pegawai_id" class="form-label fw-semibold">Pilih Pegawai (Aktif)</label>
+                <label for="pegawai_id" class="form-label fw-semibold">Pilih Pegawai (Aktif - PNS / PPPK Penuh Waktu)</label>
                 <select id="pegawai_id" name="pegawai_id" class="form-select" required>
                     <option value="">-- Pilih Pegawai --</option>
                     @foreach($pegawais as $pegawai)
-                        <option value="{{ $pegawai->id }}">{{ $pegawai->nip }} - {{ $pegawai->nama_lengkap }}</option>
+                        <option value="{{ $pegawai->id }}">[{{ strtoupper($pegawai->status_kepegawaian) }}] {{ $pegawai->nip }} - {{ $pegawai->nama_lengkap_bergelar ?? $pegawai->nama_lengkap }}</option>
                     @endforeach
                 </select>
             </div>
@@ -33,7 +61,7 @@
     </div>
 </div>
 
-<div class="card shadow-sm border-0 d-none" id="previewContainer">
+<div class="card shadow-sm border-0 d-none" id="previewContainer" style="position: relative; z-index: 1;">
     <div class="card-header bg-white border-bottom-0 pt-4 pb-0 d-flex justify-content-between align-items-center">
         <h6 class="mb-0 fw-bold">Preview Cetak</h6>
         <button type="button" id="btnPrint" class="btn btn-sm btn-success">
@@ -49,12 +77,11 @@
 @endsection
 
 @push('scripts')
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
 <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        // Initialize Choices.js
+        // Initialize Choices.js with full search limit & keep choices accessible
         const choicesEl = document.getElementById('pegawai_id');
         const choices = new Choices(choicesEl, {
             searchEnabled: true,
@@ -62,6 +89,17 @@
             itemSelectText: '',
             noResultsText: 'Pegawai tidak ditemukan',
             noChoicesText: 'Tidak ada pilihan',
+            shouldSort: false,
+            searchResultLimit: 500,
+            renderChoiceLimit: -1,
+            removeItemButton: false,
+            allowHTML: false,
+            position: 'bottom',
+        });
+
+        // Always clear search input when dropdown is shown so all options are listed
+        choicesEl.addEventListener('showDropdown', function() {
+            choices.clearInput();
         });
 
         const btnPreview = document.getElementById('btnPreview');
@@ -69,8 +107,12 @@
         const previewContainer = document.getElementById('previewContainer');
         const previewFrame = document.getElementById('previewFrame');
 
+        function getSelectedPegawaiId() {
+            return choices.getValue(true) || choicesEl.value;
+        }
+
         function tampilkanPreview() {
-            const pegawaiId = choicesEl.value;
+            const pegawaiId = getSelectedPegawaiId();
             const tanggalKp4 = document.getElementById('tanggal_kp4').value;
 
             if (!pegawaiId) {
@@ -89,7 +131,7 @@
         btnPreview.addEventListener('click', tampilkanPreview);
 
         btnPrint.addEventListener('click', function() {
-            const pegawaiId = choicesEl.value;
+            const pegawaiId = getSelectedPegawaiId();
             const tanggalKp4 = document.getElementById('tanggal_kp4').value;
             if (!pegawaiId || !tanggalKp4) return;
             window.open(`/pegawai/${pegawaiId}/kp4?tanggal_kp4=${tanggalKp4}`, '_blank');
@@ -97,11 +139,15 @@
 
         // Auto-refresh preview if already open
         choicesEl.addEventListener('change', function() {
-            if (!previewContainer.classList.contains('d-none')) tampilkanPreview();
+            if (!previewContainer.classList.contains('d-none')) {
+                tampilkanPreview();
+            }
         });
 
         document.getElementById('tanggal_kp4').addEventListener('change', function() {
-            if (!previewContainer.classList.contains('d-none')) tampilkanPreview();
+            if (!previewContainer.classList.contains('d-none')) {
+                tampilkanPreview();
+            }
         });
     });
 </script>

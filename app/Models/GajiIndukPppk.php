@@ -40,6 +40,11 @@ class GajiIndukPppk extends Model
         'jumlah_potongan',
         'bersih_sementara',
         'bersih_resmi',
+        'potongan_zakat',
+        'potongan_infaq',
+        'potongan_korpri',
+        'potongan_lain_lain',
+        'net_transfer',
         'is_locked',
     ];
 

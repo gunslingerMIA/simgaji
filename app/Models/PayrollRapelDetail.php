@@ -16,6 +16,7 @@ class PayrollRapelDetail extends Model
     protected $casts = [
         'bulan' => 'integer',
         'tahun' => 'integer',
+        'jumlah_bulan' => 'integer',
         'gaji_lama' => 'float',
         'gaji_baru' => 'float',
         'selisih_bruto' => 'float',

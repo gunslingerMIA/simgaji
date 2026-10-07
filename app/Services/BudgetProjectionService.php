@@ -9,43 +9,57 @@ class BudgetProjectionService
 {
     /**
      * Get the total realization for the latest gaji induk in a specific year.
-     * We use penghasilan_bruto as the actual expenditure (gross).
+     * We use gross salary (kotor_resmi) across PNS, PPPK, and PPPK Paruh Waktu.
      */
     public function getLatestGajiIndukTotal($tahun)
     {
-        $latestPeriod = DB::table('payroll_periode')
-            ->where('tahun', $tahun)
-            ->where('jenis', 'gaji_induk')
-            ->orderBy('bulan', 'desc')
-            ->first();
+        $latestBulanPns = DB::table('gaji_induk_pns')->where('tahun', $tahun)->max('bulan');
+        $latestBulanPppk = DB::table('gaji_induk_pppk')->where('tahun', $tahun)->max('bulan');
+        $latestBulanPppkPw = DB::table('gaji_induk_pppk_paruh_waktu')->where('tahun', $tahun)->max('bulan');
 
-        if (! $latestPeriod) {
+        $latestBulan = max((int) ($latestBulanPns ?? 0), (int) ($latestBulanPppk ?? 0), (int) ($latestBulanPppkPw ?? 0));
+
+        if (! $latestBulan) {
             return 0;
         }
 
-        return DB::table('payroll_gaji_induk')
-            ->where('payroll_periode_id', $latestPeriod->id)
-            ->sum('penghasilan_bruto');
+        $bulanPad = str_pad((string) $latestBulan, 2, '0', STR_PAD_LEFT);
+
+        $totalPns = DB::table('gaji_induk_pns')
+            ->where('tahun', $tahun)
+            ->where('bulan', $bulanPad)
+            ->sum('kotor_resmi');
+
+        $totalPppk = DB::table('gaji_induk_pppk')
+            ->where('tahun', $tahun)
+            ->where('bulan', $bulanPad)
+            ->sum('kotor_resmi');
+
+        $totalPppkPw = DB::table('gaji_induk_pppk_paruh_waktu')
+            ->where('tahun', $tahun)
+            ->where('bulan', $bulanPad)
+            ->sum('gaji_pokok');
+
+        return (float) ($totalPns + $totalPppk + $totalPppkPw);
     }
 
     /**
      * Get the total realization for the latest TPP in a specific year.
-     * We use tpp_kotor as the actual expenditure (gross).
+     * We use tpp_kotor as the actual gross expenditure.
      */
     public function getLatestTppTotal($tahun)
     {
-        $latestPeriod = DB::table('payroll_periode')
-            ->where('tahun', $tahun)
-            ->where('jenis', 'tpp')
-            ->orderBy('bulan', 'desc')
-            ->first();
+        $latestBulan = DB::table('tpp')->where('tahun', $tahun)->max('bulan');
 
-        if (! $latestPeriod) {
+        if (! $latestBulan) {
             return 0;
         }
 
-        return DB::table('payroll_tpp')
-            ->where('payroll_periode_id', $latestPeriod->id)
+        $bulanPad = str_pad((string) $latestBulan, 2, '0', STR_PAD_LEFT);
+
+        return (float) DB::table('tpp')
+            ->where('tahun', $tahun)
+            ->where('bulan', $bulanPad)
             ->sum('tpp_kotor');
     }
 
@@ -76,7 +90,7 @@ class BudgetProjectionService
      */
     public function getRapelTotal($tahun)
     {
-        return DB::table('payroll_rapel_detail')
+        return (float) DB::table('payroll_rapel_detail')
             ->join('payroll_rapel', 'payroll_rapel.id', '=', 'payroll_rapel_detail.payroll_rapel_id')
             ->where('payroll_rapel.tahun_bayar', $tahun)
             ->sum('payroll_rapel_detail.selisih_bruto');

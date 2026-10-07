@@ -64,10 +64,23 @@ class GajiIndukPnsController extends Controller
         $gajiToInsert = [];
 
         foreach ($pegawais as $pegawai) {
-            // Gapok
+            // Gapok sesuai Golongan dan Masa Kerja Golongan (MKG) dari master / riwayat
             $refGaji = RefGajiPokokPns::where('golongan', $pegawai->golongan)
                 ->where('mkg', $pegawai->mkg_tahun)
                 ->first();
+
+            if (! $refGaji) {
+                $refGaji = RefGajiPokokPns::where('golongan', $pegawai->golongan)
+                    ->where('mkg', '<=', $pegawai->mkg_tahun)
+                    ->orderBy('mkg', 'desc')
+                    ->first();
+            }
+
+            if (! $refGaji) {
+                $refGaji = RefGajiPokokPns::where('golongan', $pegawai->golongan)
+                    ->orderBy('mkg', 'asc')
+                    ->first();
+            }
 
             $gapok = $refGaji ? (float) $refGaji->nominal : 0;
             if ($gapok == 0) {
@@ -164,6 +177,16 @@ class GajiIndukPnsController extends Controller
             $tunjPembulatan = $bersihResmi - $bersihSementara;
             $kotorResmi = $kotorSementara + $tunjPembulatan;
 
+            // Potongan Lain-Lain (Zakat 2.5% dibulatkan ke ratusan ke atas jika berzakat, Infaq, Korpri)
+            $potZakat = 0;
+            if ((float) ($pegawai->default_potongan_zakat ?? 0) > 0) {
+                $potZakat = ceil(($bersihResmi * 0.025) / 100) * 100;
+            }
+            $potInfaq = (float) ($pegawai->default_potongan_infaq ?? 0);
+            $potKorpri = (float) ($pegawai->default_potongan_korpri ?? 0);
+            $potLainLain = $potZakat + $potInfaq + $potKorpri;
+            $netTransfer = $bersihResmi - $potLainLain;
+
             $gajiToInsert[] = [
                 'bulan' => $bulan,
                 'tahun' => $tahun,
@@ -194,6 +217,11 @@ class GajiIndukPnsController extends Controller
                 'jumlah_potongan' => $jumlahPotongan,
                 'bersih_sementara' => $bersihSementara,
                 'bersih_resmi' => $bersihResmi,
+                'potongan_zakat' => $potZakat,
+                'potongan_infaq' => $potInfaq,
+                'potongan_korpri' => $potKorpri,
+                'potongan_lain_lain' => $potLainLain,
+                'net_transfer' => $netTransfer,
                 'created_at' => now(),
                 'updated_at' => now(),
             ];

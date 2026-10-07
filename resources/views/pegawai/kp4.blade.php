@@ -2,6 +2,24 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
+    @php
+        $bulanIndo = [
+            1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+            5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+            9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember',
+            '01' => 'Januari', '02' => 'Februari', '03' => 'Maret', '04' => 'April',
+            '05' => 'Mei', '06' => 'Juni', '07' => 'Juli', '08' => 'Agustus',
+            '09' => 'September', '10' => 'Oktober', '11' => 'November', '12' => 'Desember',
+        ];
+        $formatTanggalIndo = function ($date) use ($bulanIndo) {
+            if (! $date) {
+                return '-';
+            }
+            $d = \Carbon\Carbon::parse($date);
+            $bln = $bulanIndo[(int) $d->format('n')] ?? $d->format('F');
+            return $d->format('j') . ' ' . $bln . ' ' . $d->format('Y');
+        };
+    @endphp
     <title>Form KP4 - {{ $pegawai->nama_lengkap }}</title>
     <style>
         body {
@@ -135,7 +153,7 @@
                 <td>3.</td>
                 <td>Tempat/Tanggal Lahir</td>
                 <td>:</td>
-                <td>{{ $pegawai->tempat_lahir ?? '-' }}, {{ $pegawai->tanggal_lahir ? \Carbon\Carbon::parse($pegawai->tanggal_lahir)->translatedFormat('d F Y') : '-' }}</td>
+                <td>{{ $pegawai->tempat_lahir ?? '-' }}, {{ $pegawai->tanggal_lahir ? $formatTanggalIndo($pegawai->tanggal_lahir) : '-' }}</td>
             </tr>
             <tr>
                 <td>4.</td>
@@ -153,19 +171,19 @@
                 <td>6.</td>
                 <td>Status Kepegawaian</td>
                 <td>:</td>
-                <td>{{ strtoupper(str_replace('_', ' ', $pegawai->status_kepegawaian)) }}</td>
+                <td>{{ strtoupper(str_replace('_', ' ', $hist['status_kepegawaian'] ?? $pegawai->status_kepegawaian)) }}</td>
             </tr>
             <tr>
                 <td>7.</td>
                 <td>Jabatan Struktural/ Fungsional</td>
                 <td>:</td>
-                <td>{{ $pegawai->jabatan ? $pegawai->jabatan->nama_jabatan : '-' }}</td>
+                <td>{{ $hist['jabatan_nama'] ?? ($pegawai->jabatan ? $pegawai->jabatan->nama_jabatan : '-') }}</td>
             </tr>
             <tr>
                 <td>8.</td>
                 <td>Pangkat/Golongan</td>
                 <td>:</td>
-                <td>{{ $pegawai->golongan ?? '-' }}</td>
+                <td>{{ $hist['golongan'] ?? ($pegawai->golongan ?? '-') }}</td>
             </tr>
             <tr>
                 <td>9.</td>
@@ -177,18 +195,14 @@
                 <td>10.</td>
                 <td>Masa kerja golongan</td>
                 <td>:</td>
-                <td>
-                    {{ $pegawai->mkg_tahun }} Tahun {{ $pegawai->mkg_bulan }} Bulan 
-                    <span style="display:inline-block; margin-left: 30px;">Masa Kerja Tambahan: {{ sprintf('%02d', $mkgTambahanTahun) }} Tahun {{ sprintf('%02d', $mkgTambahanBulan) }} Bulan</span><br>
-                    Masa Kerja Seluruhnya: {{ $mkgSeluruhnyaTahun }} Tahun {{ $mkgSeluruhnyaBulan }} Bulan
-                </td>
+                <td>{{ $hist['mkg_formatted'] ?? ($pegawai->mkg_tahun . ' Tahun ' . $pegawai->mkg_bulan . ' Bulan') }}</td>
             </tr>
             <tr>
                 <td>11.</td>
                 <td>Digaji menurut</td>
                 <td>:</td>
                 <td>
-                    @if(in_array($pegawai->status_kepegawaian, ['pns', 'cpns']))
+                    @if(in_array($hist['status_kepegawaian'] ?? $pegawai->status_kepegawaian, ['pns', 'cpns']))
                         PP Nomor 5 Tahun 2024
                     @else
                         Perpres Nomor 11 Tahun 2024
@@ -269,7 +283,7 @@
                     Kota Pekalongan<br><br><br>
                 </td>
                 <td>
-                    Pekalongan, {{ \Carbon\Carbon::parse($tanggalKp4 ?? now())->locale('id')->translatedFormat('d F Y') }}<br>
+                    Pekalongan, {{ $formatTanggalIndo($tanggalKp4 ?? now()) }}<br>
                     Pegawai yang bersangkutan,<br><br><br>
                 </td>
             </tr>

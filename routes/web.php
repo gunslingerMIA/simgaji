@@ -51,12 +51,35 @@ Route::put('jabatan/kelas/{id}', [JabatanController::class, 'updateKelas'])->nam
 
 Route::resource('pagu-anggaran', PaguAnggaranController::class)->except(['create', 'show']);
 
+use App\Http\Controllers\PemindahbukuanPnsController;
+use App\Http\Controllers\PemindahbukuanPppkController;
+
 Route::post('gaji-induk-pns/lock', [GajiIndukPnsController::class, 'lock'])->name('gaji-induk-pns.lock');
 Route::post('gaji-induk-pns/unlock', [GajiIndukPnsController::class, 'unlock'])->name('gaji-induk-pns.unlock');
+
+// Pemindahbukuan Rekening & Slip Gaji PNS
+Route::get('gaji-induk-pns/pemindahbukuan', [PemindahbukuanPnsController::class, 'index'])->name('gaji-induk-pns.pemindahbukuan.index');
+Route::post('gaji-induk-pns/pemindahbukuan/update', [PemindahbukuanPnsController::class, 'update'])->name('gaji-induk-pns.pemindahbukuan.update');
+Route::post('gaji-induk-pns/pemindahbukuan/setting', [PemindahbukuanPnsController::class, 'saveSetting'])->name('gaji-induk-pns.pemindahbukuan.setting');
+Route::get('gaji-induk-pns/pemindahbukuan/export-word', [PemindahbukuanPnsController::class, 'exportWord'])->name('gaji-induk-pns.pemindahbukuan.export-word');
+Route::get('gaji-induk-pns/pemindahbukuan/export-excel', [PemindahbukuanPnsController::class, 'exportExcel'])->name('gaji-induk-pns.pemindahbukuan.export-excel');
+Route::get('gaji-induk-pns/slip-all', [PemindahbukuanPnsController::class, 'cetakSlipAll'])->name('gaji-induk-pns.slip.all');
+Route::get('gaji-induk-pns/slip/{id}', [PemindahbukuanPnsController::class, 'cetakSlip'])->name('gaji-induk-pns.slip');
+
 Route::resource('gaji-induk-pns', GajiIndukPnsController::class)->only(['index', 'create', 'store', 'show', 'update', 'destroy']);
 
 Route::post('gaji-induk-pppk/lock', [GajiIndukPppkController::class, 'lock'])->name('gaji-induk-pppk.lock');
 Route::post('gaji-induk-pppk/unlock', [GajiIndukPppkController::class, 'unlock'])->name('gaji-induk-pppk.unlock');
+
+// Pemindahbukuan Rekening & Slip Gaji PPPK
+Route::get('gaji-induk-pppk/pemindahbukuan', [PemindahbukuanPppkController::class, 'index'])->name('gaji-induk-pppk.pemindahbukuan.index');
+Route::post('gaji-induk-pppk/pemindahbukuan/update', [PemindahbukuanPppkController::class, 'update'])->name('gaji-induk-pppk.pemindahbukuan.update');
+Route::post('gaji-induk-pppk/pemindahbukuan/setting', [PemindahbukuanPppkController::class, 'saveSetting'])->name('gaji-induk-pppk.pemindahbukuan.setting');
+Route::get('gaji-induk-pppk/pemindahbukuan/export-word', [PemindahbukuanPppkController::class, 'exportWord'])->name('gaji-induk-pppk.pemindahbukuan.export-word');
+Route::get('gaji-induk-pppk/pemindahbukuan/export-excel', [PemindahbukuanPppkController::class, 'exportExcel'])->name('gaji-induk-pppk.pemindahbukuan.export-excel');
+Route::get('gaji-induk-pppk/slip-all', [PemindahbukuanPppkController::class, 'cetakSlipAll'])->name('gaji-induk-pppk.slip.all');
+Route::get('gaji-induk-pppk/slip/{id}', [PemindahbukuanPppkController::class, 'cetakSlip'])->name('gaji-induk-pppk.slip');
+
 Route::resource('gaji-induk-pppk', GajiIndukPppkController::class)->only(['index', 'create', 'store', 'show', 'update', 'destroy']);
 
 Route::post('gaji-induk-pppk-paruh-waktu/lock', [GajiIndukPppkParuhWaktuController::class, 'lock'])->name('gaji-induk-pppk-paruh-waktu.lock');
@@ -82,15 +105,19 @@ Route::resource('gaji-tambahan-pppk-paruh-waktu', GajiTambahanPppkParuhWaktuCont
 
 // Rapel Gaji Routes
 Route::get('rapel/cetak-rekap', [RapelController::class, 'cetakRekap'])->name('rapel.cetak-rekap');
+Route::get('rapel/{id}/cetak-rekap', [RapelController::class, 'cetakRekapSet'])->name('rapel.cetak-rekap-set');
+Route::post('rapel/preview-auto-item', [RapelController::class, 'previewAutoItem'])->name('rapel.preview-auto-item');
 Route::post('rapel/preview-individual', [RapelController::class, 'previewIndividual'])->name('rapel.preview.individual');
 Route::post('rapel/store-individual', [RapelController::class, 'storeIndividual'])->name('rapel.store.individual');
 Route::post('rapel/store-massal', [RapelController::class, 'storeMassal'])->name('rapel.store.massal');
 Route::post('rapel/{id}/add-detail', [RapelController::class, 'storeDetailRow'])->name('rapel.detail.store');
+Route::post('rapel/{id}/add-detail-auto', [RapelController::class, 'storeDetailAuto'])->name('rapel.detail.store-auto');
+Route::post('rapel/{id}/generate-batch', [RapelController::class, 'generateBatchDetails'])->name('rapel.generate-batch');
 Route::put('rapel/detail/{id}', [RapelController::class, 'updateDetail'])->name('rapel.detail.update');
 Route::delete('rapel/detail/{id}', [RapelController::class, 'destroyDetailRow'])->name('rapel.detail.destroy');
 Route::post('rapel/{id}/lock', [RapelController::class, 'lock'])->name('rapel.lock');
 Route::post('rapel/{id}/unlock', [RapelController::class, 'unlock'])->name('rapel.unlock');
 Route::get('rapel/{id}/cetak', [RapelController::class, 'cetak'])->name('rapel.cetak');
-Route::resource('rapel', RapelController::class)->only(['index', 'create', 'show', 'destroy']);
+Route::resource('rapel', RapelController::class)->only(['index', 'create', 'store', 'show', 'destroy']);
 
 Route::get('early-warning', [EarlyWarningController::class, 'index'])->name('early-warning.index');
