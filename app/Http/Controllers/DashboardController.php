@@ -31,10 +31,11 @@ class DashboardController extends Controller
         $gajiPppk = GajiIndukPppk::where('bulan', $currentMonthPad)->where('tahun', $currentYear)->get();
         $gajiPppkPw = GajiIndukPppkParuhWaktu::where('bulan', $currentMonthPad)->where('tahun', $currentYear)->get();
 
-        $gajiIndukTotal = $gajiPns->sum('kotor_resmi') + $gajiPppk->sum('kotor_resmi') + $gajiPppkPw->sum('gaji_pokok');
+        $gajiIndukTotal = $gajiPns->sum('kotor_resmi') + $gajiPppk->sum('kotor_resmi') + $gajiPppkPw->sum('bruto');
 
         $isGajiLocked = ($gajiPns->count() > 0 && $gajiPns->first()->is_locked) ||
-                        ($gajiPppk->count() > 0 && $gajiPppk->first()->is_locked);
+                        ($gajiPppk->count() > 0 && $gajiPppk->first()->is_locked) ||
+                        ($gajiPppkPw->count() > 0 && $gajiPppkPw->first()->is_locked);
         $hasGaji = ($gajiPns->count() > 0 || $gajiPppk->count() > 0 || $gajiPppkPw->count() > 0);
 
         $periodeGajiInduk = $hasGaji ? (object) ['is_locked' => $isGajiLocked] : null;

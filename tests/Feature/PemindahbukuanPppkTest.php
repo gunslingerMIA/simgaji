@@ -182,3 +182,40 @@ it('can render single and mass slip gaji PPPK', function () {
     $responseAll->assertSee('SLIP PEMBAYARAN GAJI INDUK PPPK');
     $responseAll->assertSee('Budi Santoso, S.T');
 });
+
+it('shows pemindahbukuan button on pppk index only when data is locked and shows export buttons only after saved', function () {
+    // 1. Unlocked state on PPPK index -> Pemindahbukuan button NOT visible
+    $this->gaji->update(['is_locked' => false]);
+    $resIndex = $this->get(route('gaji-induk-pppk.index', ['bulan' => '10', 'tahun' => '2026']));
+    $resIndex->assertDontSee('Pemindahbukuan Rekening');
+
+    // 2. Locked state on PPPK index -> Pemindahbukuan button IS visible
+    $this->gaji->update(['is_locked' => true]);
+    $resIndexLocked = $this->get(route('gaji-induk-pppk.index', ['bulan' => '10', 'tahun' => '2026']));
+    $resIndexLocked->assertSee('Pemindahbukuan Rekening');
+
+    // 3. Before clicking simpan in Pemindahbukuan -> Export buttons NOT visible, Note is visible
+    AppSetting::set('pemindahbukuan_pppk_saved_2026_10', '0');
+    $resPem = $this->get(route('gaji-induk-pppk.pemindahbukuan.index', ['bulan' => '10', 'tahun' => '2026']));
+    $resPem->assertDontSee('Download Word (.docx)');
+    $resPem->assertDontSee('Export Excel (2 Sheet)');
+    $resPem->assertSee('Simpan Perubahan');
+
+    // 4. After clicking simpan in Pemindahbukuan -> Export buttons ARE visible
+    $this->post(route('gaji-induk-pppk.pemindahbukuan.update'), [
+        'bulan' => '10',
+        'tahun' => '2026',
+        'items' => [
+            [
+                'id' => $this->gaji->id,
+                'potongan_zakat' => 87000,
+                'potongan_infaq' => 0,
+                'potongan_korpri' => 0,
+            ],
+        ],
+    ]);
+
+    $resPemSaved = $this->get(route('gaji-induk-pppk.pemindahbukuan.index', ['bulan' => '10', 'tahun' => '2026']));
+    $resPemSaved->assertSee('Download Word (.docx)');
+    $resPemSaved->assertSee('Export Excel (2 Sheet)');
+});

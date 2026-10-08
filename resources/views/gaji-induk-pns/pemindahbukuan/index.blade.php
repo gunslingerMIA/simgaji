@@ -34,17 +34,19 @@
                             <i class="fa-solid fa-file-pen me-1"></i> Setting Naskah & Placeholder
                         </button>
 
-                        <a href="{{ route('gaji-induk-pns.pemindahbukuan.export-word', ['bulan' => $bulan, 'tahun' => $tahun]) }}" class="btn btn-primary fw-semibold">
-                            <i class="fa-solid fa-file-word me-1"></i> Download Word (.docx)
-                        </a>
+                        @if($isSaved)
+                            <a href="{{ route('gaji-induk-pns.pemindahbukuan.export-word', ['bulan' => $bulan, 'tahun' => $tahun]) }}" class="btn btn-primary fw-semibold">
+                                <i class="fa-solid fa-file-word me-1"></i> Download Word (.docx)
+                            </a>
 
-                        <a href="{{ route('gaji-induk-pns.pemindahbukuan.export-excel', ['bulan' => $bulan, 'tahun' => $tahun]) }}" class="btn btn-success fw-semibold">
-                            <i class="fa-solid fa-file-excel me-1"></i> Export Excel (2 Sheet)
-                        </a>
+                            <a href="{{ route('gaji-induk-pns.pemindahbukuan.export-excel', ['bulan' => $bulan, 'tahun' => $tahun]) }}" class="btn btn-success fw-semibold">
+                                <i class="fa-solid fa-file-excel me-1"></i> Export Excel (2 Sheet)
+                            </a>
 
-                        <a href="{{ route('gaji-induk-pns.slip.all', ['bulan' => $bulan, 'tahun' => $tahun]) }}" target="_blank" class="btn btn-info text-white fw-semibold">
-                            <i class="fa-solid fa-receipt me-1"></i> Cetak Semua Slip Gaji
-                        </a>
+                            <a href="{{ route('gaji-induk-pns.slip.all', ['bulan' => $bulan, 'tahun' => $tahun]) }}" target="_blank" class="btn btn-info text-white fw-semibold">
+                                <i class="fa-solid fa-receipt me-1"></i> Cetak Semua Slip Gaji
+                            </a>
+                        @endif
                     </div>
                 </div>
 
@@ -62,6 +64,15 @@
                             <i class="fa-solid fa-triangle-exclamation fs-5 me-2"></i>
                             <div>{{ session('error') }}</div>
                             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    @endif
+
+                    @if(!$isSaved && count($gajiPns) > 0)
+                        <div class="alert alert-warning d-flex align-items-center mb-4" role="alert">
+                            <i class="fa-solid fa-circle-info fs-5 me-2"></i>
+                            <div>
+                                <strong>Catatan:</strong> Tombol <strong>Download Word & Export Excel</strong> akan muncul setelah Anda meninjau dan mengklik tombol <strong>Simpan Perubahan Zakat & Infaq</strong> di bagian bawah tabel.
+                            </div>
                         </div>
                     @endif
 
@@ -360,9 +371,11 @@
                         <button type="submit" class="btn btn-success fw-bold px-3">
                             <i class="fa-solid fa-floppy-disk me-1"></i> Simpan Pengaturan
                         </button>
-                        <button type="submit" formaction="{{ route('gaji-induk-pns.pemindahbukuan.export-word') }}" formmethod="GET" formtarget="_self" class="btn btn-primary fw-bold px-3">
-                            <i class="fa-solid fa-file-word me-1"></i> Download Word (.docx)
-                        </button>
+                        @if($isSaved)
+                            <button type="submit" formaction="{{ route('gaji-induk-pns.pemindahbukuan.export-word') }}" formmethod="GET" formtarget="_self" class="btn btn-primary fw-bold px-3">
+                                <i class="fa-solid fa-file-word me-1"></i> Download Word (.docx)
+                            </button>
+                        @endif
                     </div>
                 </div>
             </div>

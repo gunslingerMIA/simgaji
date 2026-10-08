@@ -71,6 +71,7 @@ class PemindahbukuanPppkController extends Controller
         $totalNetTransfer = $gajiPppk->sum(fn ($g) => $g->bersih_resmi - ($g->potongan_zakat + $g->potongan_infaq + $g->potongan_korpri));
 
         $meta = $this->getMetaSettings($request, $bulanPad, $tahun, $namaBulan);
+        $isSaved = AppSetting::get("pemindahbukuan_pppk_saved_{$tahun}_{$bulanPad}", '0') === '1';
 
         return view('gaji-induk-pppk.pemindahbukuan.index', compact(
             'gajiPppk',
@@ -82,7 +83,8 @@ class PemindahbukuanPppkController extends Controller
             'totalInfaq',
             'totalPotongan',
             'totalNetTransfer',
-            'meta'
+            'meta',
+            'isSaved'
         ));
     }
 
@@ -159,6 +161,8 @@ class PemindahbukuanPppkController extends Controller
                 ]);
             }
         }
+
+        AppSetting::set("pemindahbukuan_pppk_saved_{$validated['tahun']}_{$validated['bulan']}", '1');
 
         return redirect()->route('gaji-induk-pppk.pemindahbukuan.index', [
             'bulan' => $validated['bulan'],

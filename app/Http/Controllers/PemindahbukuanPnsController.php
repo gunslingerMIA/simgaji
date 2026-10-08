@@ -70,6 +70,7 @@ class PemindahbukuanPnsController extends Controller
         $totalNetTransfer = $gajiPns->sum(fn ($g) => $g->bersih_resmi - ($g->potongan_zakat + $g->potongan_infaq + $g->potongan_korpri));
 
         $meta = $this->getMetaSettings($request, $bulanPad, $tahun, $namaBulan);
+        $isSaved = AppSetting::get("pemindahbukuan_pns_saved_{$tahun}_{$bulanPad}", '0') === '1';
 
         return view('gaji-induk-pns.pemindahbukuan.index', compact(
             'gajiPns',
@@ -81,7 +82,8 @@ class PemindahbukuanPnsController extends Controller
             'totalInfaq',
             'totalPotongan',
             'totalNetTransfer',
-            'meta'
+            'meta',
+            'isSaved'
         ));
     }
 
@@ -158,6 +160,8 @@ class PemindahbukuanPnsController extends Controller
                 ]);
             }
         }
+
+        AppSetting::set("pemindahbukuan_pns_saved_{$validated['tahun']}_{$validated['bulan']}", '1');
 
         return redirect()->route('gaji-induk-pns.pemindahbukuan.index', [
             'bulan' => $validated['bulan'],

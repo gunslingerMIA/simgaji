@@ -13,9 +13,11 @@
                         <p class="text-muted small mb-0">Menampilkan data gaji induk untuk bulan {{ str_pad($bulan, 2, '0', STR_PAD_LEFT) }} tahun {{ $tahun }}.</p>
                     </div>
                     <div class="d-flex gap-2 flex-wrap align-items-center">
-                        <a href="{{ route('gaji-induk-pppk.pemindahbukuan.index', ['bulan' => $bulan, 'tahun' => $tahun]) }}" class="btn btn-outline-primary fw-semibold">
-                            <i class="fa-solid fa-building-columns me-1"></i> Pemindahbukuan Rekening
-                        </a>
+                        @if(count($gajiPppk) > 0 && $gajiPppk->first()->is_locked)
+                            <a href="{{ route('gaji-induk-pppk.pemindahbukuan.index', ['bulan' => $bulan, 'tahun' => $tahun]) }}" class="btn btn-outline-primary fw-semibold">
+                                <i class="fa-solid fa-building-columns me-1"></i> Pemindahbukuan Rekening
+                            </a>
+                        @endif
                         <a href="{{ route('gaji-induk-pppk.slip.all', ['bulan' => $bulan, 'tahun' => $tahun]) }}" target="_blank" class="btn btn-outline-info fw-semibold">
                             <i class="fa-solid fa-receipt me-1"></i> Slip Gaji
                         </a>

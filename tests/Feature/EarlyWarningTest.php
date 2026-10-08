@@ -1,11 +1,13 @@
 <?php
 
 use App\Models\GajiIndukPns;
+use App\Models\GajiIndukPppkParuhWaktu;
 use App\Models\PaguAnggaran;
 use App\Models\Pegawai;
 use App\Models\RefJabatan;
 use App\Models\RefKelasJabatan;
 use App\Models\Tpp;
+use App\Services\BudgetProjectionService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 
@@ -150,4 +152,80 @@ it('can view early warning system index and calculate deficit', function () {
     $response->assertSee('21.100.000');
     $response->assertSee('11.100.000');
     $response->assertSee('Peringatan!');
+});
+
+it('correctly calculates budget projection with gaji induk pppk paruh waktu', function () {
+    $tahun = '2026';
+
+    PaguAnggaran::create([
+        'tahun' => $tahun,
+        'kode_rekening' => '5.1.01',
+        'uraian' => 'Belanja Gaji PPPK PW',
+        'pagu_penetapan' => 50000000,
+        'pagu_pergeseran' => 0,
+        'pagu_perubahan' => 0,
+    ]);
+
+    $kelas = RefKelasJabatan::create([
+        'kelas' => 7,
+        'basic_tpp' => 1000,
+    ]);
+
+    $jabatan = RefJabatan::create([
+        'nama_jabatan' => 'Staff PW',
+        'jenis_jabatan' => 'pelaksana',
+        'ref_kelas_jabatan_id' => $kelas->id,
+    ]);
+
+    $pegawai = Pegawai::create([
+        'nip' => 'PW999',
+        'nama_lengkap' => 'Paruh Waktu User',
+        'nik' => '99999',
+        'jenis_kelamin' => 'L',
+        'status_kepegawaian' => 'pppk_paruh_waktu',
+        'status_pernikahan' => 'belum_kawin',
+        'golongan' => '-',
+        'mkg_tahun' => 0,
+        'mkg_bulan' => 0,
+        'ref_jabatan_id' => $jabatan->id,
+        'tmt_pangkat_terakhir' => now(),
+        'tmt_kgb_terakhir' => now(),
+        'nomor_rekening' => '999',
+        'nama_pada_rekening' => 'Paruh Waktu User',
+        'ptkp_status' => 'TK/0',
+        'is_active' => true,
+    ]);
+
+    GajiIndukPppkParuhWaktu::create([
+        'bulan' => '11',
+        'tahun' => $tahun,
+        'pegawai_id' => $pegawai->id,
+        'nip' => $pegawai->nip,
+        'nama' => $pegawai->nama_lengkap,
+        'jabatan' => 'Tenaga Teknis',
+        'no_rekening' => '999',
+        'upah_pokok' => 2000000,
+        'dasar_bpjs' => 2000000,
+        'dasar_jkk_jkm' => 2000000,
+        'tunjangan_bpjs' => 80000,
+        'tunjangan_jkk' => 4800,
+        'tunjangan_jkm' => 14400,
+        'tunjangan_pembulatan' => 0,
+        'bruto' => 2099200,
+        'potongan_bpjs_4' => 80000,
+        'potongan_bpjs_1' => 20000,
+        'potongan_jkk' => 4800,
+        'potongan_jkm' => 14400,
+        'potongan_pph' => 0,
+        'jumlah_potongan' => 119200,
+        'bersih' => 1980000,
+        'is_locked' => true,
+    ]);
+
+    $service = app(BudgetProjectionService::class);
+    $result = $service->calculate($tahun);
+
+    expect($result['latest_gaji_induk'])->toEqual(2099200.0)
+        ->and($result['monthly_total'])->toEqual(2099200.0)
+        ->and($result['projected_total'])->toEqual(2099200.0 * 14);
 });

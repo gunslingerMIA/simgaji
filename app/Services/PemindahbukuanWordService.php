@@ -353,4 +353,272 @@ class PemindahbukuanWordService
 
         return $phpWord;
     }
+
+    /**
+     * Generate PhpWord document for Pemindahbukuan Rekening Gaji PPPK Paruh Waktu.
+     */
+    public function generateParuhWaktu(Collection $gajiParuhWaktu, array $meta): PhpWord
+    {
+        $phpWord = new PhpWord;
+
+        $phpWord->setDefaultFontName('Arial');
+        $phpWord->setDefaultFontSize(11);
+        $phpWord->setDefaultParagraphStyle([
+            'lineHeight' => 1.15,
+            'spaceBefore' => 0,
+            'spaceAfter' => 0,
+        ]);
+
+        // Section setup: F4 / Folio (21.5 cm x 33.0 cm)
+        $section = $phpWord->addSection([
+            'pageSizeW' => Converter::cmToTwip(21.5),
+            'pageSizeH' => Converter::cmToTwip(33.0),
+            'orientation' => 'portrait',
+            'marginTop' => Converter::cmToTwip(1.5),
+            'marginLeft' => Converter::cmToTwip(3.0),
+            'marginBottom' => Converter::cmToTwip(1.5),
+            'marginRight' => Converter::cmToTwip(2.0),
+        ]);
+
+        $totalBersih = (float) $gajiParuhWaktu->sum('bersih');
+        $terbilang = TerbilangHelper::make($totalBersih);
+
+        $namaBulan = $meta['nama_bulan'] ?? 'Januari';
+        $tahun = $meta['tahun'] ?? date('Y');
+        $nomorRekeningDinas = $meta['nomor_rekening_dinas'] ?? '1-007-007-015';
+        $namaBank = $meta['nama_bank'] ?? 'Bank Pekalongan';
+
+        $noBorderTableStyle = [
+            'borderSize' => 0,
+            'borderColor' => 'FFFFFF',
+            'borderTopSize' => 0,
+            'borderBottomSize' => 0,
+            'borderLeftSize' => 0,
+            'borderRightSize' => 0,
+            'cellMarginTop' => 0,
+            'cellMarginBottom' => 0,
+            'cellMarginLeft' => 0,
+            'cellMarginRight' => 0,
+        ];
+
+        // =========================================================================
+        // HALAMAN 1: SURAT PENGANTAR PEMINDAHBUKUAN PPPK PARUH WAKTU
+        // =========================================================================
+
+        // 1. KOP SURAT
+        $kopPath = public_path('images/kop_dpmptsp.png');
+        if (file_exists($kopPath)) {
+            $section->addImage($kopPath, [
+                'width' => 450,
+                'alignment' => 'center',
+                'wrappingStyle' => 'inline',
+            ]);
+        }
+        $section->addTextBreak(1);
+
+        // 2. Tanggal (Kanan)
+        $dateTable = $section->addTable($noBorderTableStyle);
+        $dateRow = $dateTable->addRow();
+        $dateRow->addCell(4500);
+        $dateRow->addCell(4500)->addText("Pekalongan, {$meta['tanggal_naskah']}", ['name' => 'Arial', 'size' => 11], ['alignment' => 'right']);
+
+        // 3. Meta Surat
+        $metaTable = $section->addTable($noBorderTableStyle);
+
+        $r1 = $metaTable->addRow();
+        $r1->addCell(1200)->addText('Nomor', ['name' => 'Arial', 'size' => 11]);
+        $r1->addCell(200)->addText(':', ['name' => 'Arial', 'size' => 11]);
+        $r1->addCell(7600)->addText($meta['nomor_naskah'], ['name' => 'Arial', 'size' => 11]);
+
+        $r2 = $metaTable->addRow();
+        $r2->addCell(1200)->addText('Sifat', ['name' => 'Arial', 'size' => 11]);
+        $r2->addCell(200)->addText(':', ['name' => 'Arial', 'size' => 11]);
+        $r2->addCell(7600)->addText('Biasa', ['name' => 'Arial', 'size' => 11]);
+
+        $r3 = $metaTable->addRow();
+        $r3->addCell(1200)->addText('Lampiran', ['name' => 'Arial', 'size' => 11]);
+        $r3->addCell(200)->addText(':', ['name' => 'Arial', 'size' => 11]);
+        $r3->addCell(7600)->addText('1 (satu) lembar', ['name' => 'Arial', 'size' => 11]);
+
+        $r4 = $metaTable->addRow();
+        $r4->addCell(1200, ['valign' => VerticalJc::TOP])->addText('Hal', ['name' => 'Arial', 'size' => 11]);
+        $r4->addCell(200, ['valign' => VerticalJc::TOP])->addText(':', ['name' => 'Arial', 'size' => 11]);
+        $halCell = $r4->addCell(7600);
+        $halCell->addText('Permohonan Pemindahbukuan Rekening', ['name' => 'Arial', 'size' => 11]);
+        $halCell->addText("Gaji PPPK Paruh Waktu Bulan {$namaBulan} {$tahun}", ['name' => 'Arial', 'size' => 11]);
+
+        $section->addTextBreak(1);
+
+        // 4. Tujuan Surat
+        $section->addText("Yth. Pimpinan {$namaBank}", ['name' => 'Arial', 'size' => 11]);
+        $section->addText('di', ['name' => 'Arial', 'size' => 11], ['indent' => 0.4]);
+        $section->addText('PEKALONGAN', ['name' => 'Arial', 'size' => 11, 'bold' => true], ['indent' => 0.4]);
+
+        $section->addTextBreak(1);
+
+        // 5. Paragraf Pembuka
+        $section->addText(
+            '    Dengan hormat, sehubungan dengan pembayaran gaji Pegawai Pemerintah dengan Perjanjian Kerja (PPPK) Paruh Waktu pada Dinas Penanaman Modal dan Pelayanan Terpadu Satu Pintu Kota Pekalongan, bersama ini kami mohon agar dilakukan pemindahbukuan dana gaji dari Rekening Gaji PPPK Paruh Waktu:',
+            ['name' => 'Arial', 'size' => 11],
+            ['alignment' => 'both', 'lineHeight' => 1.15]
+        );
+
+        $section->addTextBreak(1);
+
+        // Info Bulan & No Rekening
+        $infoTable = $section->addTable($noBorderTableStyle);
+        $ir1 = $infoTable->addRow();
+        $ir1->addCell(1800)->addText('Bulan', ['name' => 'Arial', 'size' => 11]);
+        $ir1->addCell(200)->addText(':', ['name' => 'Arial', 'size' => 11]);
+        $ir1->addCell(7000)->addText("{$namaBulan} {$tahun}", ['name' => 'Arial', 'size' => 11]);
+
+        $ir2 = $infoTable->addRow();
+        $ir2->addCell(1800)->addText('Nomor Rekening', ['name' => 'Arial', 'size' => 11]);
+        $ir2->addCell(200)->addText(':', ['name' => 'Arial', 'size' => 11]);
+        $ir2->addCell(7000)->addText($nomorRekeningDinas, ['name' => 'Arial', 'size' => 11, 'bold' => true]);
+
+        $section->addTextBreak(1);
+
+        // Dana Sebesar Table
+        $danaTable = $section->addTable($noBorderTableStyle);
+        $dr1 = $danaTable->addRow();
+        $dr1->addCell(6200)->addText('ke rekening masing-masing penerima gaji, sebagaimana tercantum dalam daftar terlampir, dengan total jumlah dana sebesar', ['name' => 'Arial', 'size' => 11], ['alignment' => 'both']);
+        $dr1->addCell(500)->addText('Rp', ['name' => 'Arial', 'size' => 11, 'bold' => true], ['alignment' => 'right']);
+        $dr1->addCell(2300)->addText(number_format($totalBersih, 0, ',', '.'), ['name' => 'Arial', 'size' => 11, 'bold' => true], ['alignment' => 'right']);
+
+        $section->addTextBreak(1);
+
+        // Terbilang
+        $section->addText('Terbilang:', ['name' => 'Arial', 'size' => 11]);
+        $section->addText("    {$terbilang}", ['name' => 'Arial', 'size' => 11, 'bold' => true, 'italic' => true]);
+
+        $section->addTextBreak(1);
+
+        // Penutup
+        $section->addText('    Demikian atas perhatian dan kerjasamanya kami ucapkan terima kasih.', ['name' => 'Arial', 'size' => 11]);
+
+        $section->addTextBreak(1);
+
+        // Tanda Tangan Surat Pengantar
+        $ttdTable = $section->addTable($noBorderTableStyle);
+        $ttdRow = $ttdTable->addRow();
+        $ttdRow->addCell(4500);
+        $ttdCell = $ttdRow->addCell(4500);
+
+        $ttdCell->addText('Ditandatangani secara elektronik oleh:', ['name' => 'Arial', 'size' => 11], ['alignment' => 'center']);
+        $ttdCell->addText($meta['jabatan_pengirim'], ['name' => 'Arial', 'size' => 11, 'bold' => true], ['alignment' => 'center']);
+        $ttdCell->addTextBreak(2);
+        $ttdCell->addText($meta['ttd_pengirim'], ['name' => 'Arial', 'size' => 11], ['alignment' => 'center']);
+        $ttdCell->addTextBreak(2);
+        $ttdCell->addText($meta['nama_pengirim'], ['name' => 'Arial', 'size' => 11, 'bold' => true, 'underline' => 'single'], ['alignment' => 'center']);
+        $ttdCell->addText("NIP. {$meta['nip_pengirim']}", ['name' => 'Arial', 'size' => 11], ['alignment' => 'center']);
+
+        // =========================================================================
+        // PAGE BREAK
+        // =========================================================================
+        $section->addPageBreak();
+
+        // =========================================================================
+        // HALAMAN 2: LAMPIRAN RINCIAN GAJI PPPK PARUH WAKTU
+        // =========================================================================
+
+        // Header Lampiran
+        $lhSub = $section->addTable($noBorderTableStyle);
+        $r0 = $lhSub->addRow();
+        $r0->addCell(9000, ['gridSpan' => 3])->addText('Lampiran Surat Kepala DPMPTSP', ['name' => 'Arial', 'size' => 11]);
+
+        $r1 = $lhSub->addRow();
+        $r1->addCell(1000)->addText('Nomor', ['name' => 'Arial', 'size' => 11]);
+        $r1->addCell(200)->addText(':', ['name' => 'Arial', 'size' => 11]);
+        $r1->addCell(7800)->addText($meta['nomor_naskah'], ['name' => 'Arial', 'size' => 11]);
+
+        $r2 = $lhSub->addRow();
+        $r2->addCell(1000)->addText('Tanggal', ['name' => 'Arial', 'size' => 11]);
+        $r2->addCell(200)->addText(':', ['name' => 'Arial', 'size' => 11]);
+        $r2->addCell(7800)->addText($meta['tanggal_naskah'], ['name' => 'Arial', 'size' => 11]);
+
+        $r3 = $lhSub->addRow();
+        $r3->addCell(1000)->addText('Perihal', ['name' => 'Arial', 'size' => 11]);
+        $r3->addCell(200)->addText(':', ['name' => 'Arial', 'size' => 11]);
+        $r3->addCell(7800)->addText("Permohonan Pemindahbukuan Rekening Gaji PPPK Paruh Waktu Bulan {$namaBulan} {$tahun}", ['name' => 'Arial', 'size' => 11]);
+
+        $section->addTextBreak(1);
+
+        // Judul Lampiran
+        $section->addText('DAFTAR RINCIAN GAJI PPPK PARUH WAKTU', ['name' => 'Arial', 'size' => 11, 'bold' => true], ['alignment' => 'center']);
+        $section->addText('DINAS PENANAMAN MODAL DAN PELAYANAN TERPADU SATU PINTU', ['name' => 'Arial', 'size' => 11, 'bold' => true], ['alignment' => 'center']);
+        $section->addText('KOTA PEKALONGAN', ['name' => 'Arial', 'size' => 11, 'bold' => true], ['alignment' => 'center']);
+        $section->addText('BULAN '.strtoupper($namaBulan)." TAHUN {$tahun}", ['name' => 'Arial', 'size' => 11, 'bold' => true], ['alignment' => 'center']);
+
+        $section->addTextBreak(1);
+
+        // Tabel Rincian (4 Kolom dengan warna header biru seperti lampiran)
+        $gridTableStyle = [
+            'borderSize' => 6,
+            'borderColor' => '000000',
+            'alignment' => 'center',
+            'cellMarginTop' => 30,
+            'cellMarginBottom' => 30,
+            'cellMarginLeft' => 40,
+            'cellMarginRight' => 40,
+        ];
+        $headerCellStyle = [
+            'valign' => VerticalJc::CENTER,
+            'bgColor' => '5B9BD5',
+        ];
+
+        $detailTable = $section->addTable($gridTableStyle);
+
+        // Header Row 1
+        $hRow1 = $detailTable->addRow();
+        $hRow1->addCell(600, $headerCellStyle)->addText('NO', ['name' => 'Arial', 'size' => 9.5, 'bold' => true], ['alignment' => 'center']);
+        $hRow1->addCell(2500, $headerCellStyle)->addText('REKENING', ['name' => 'Arial', 'size' => 9.5, 'bold' => true], ['alignment' => 'center']);
+        $hRow1->addCell(3900, $headerCellStyle)->addText('NAMA', ['name' => 'Arial', 'size' => 9.5, 'bold' => true], ['alignment' => 'center']);
+        $hRow1->addCell(2000, $headerCellStyle)->addText('UPAH', ['name' => 'Arial', 'size' => 9.5, 'bold' => true], ['alignment' => 'center']);
+
+        // Header Row 2 (Nomor Kolom)
+        $hRow2 = $detailTable->addRow();
+        $cols = ['(1)', '(2)', '(3)', '(4)'];
+        $colWidths = [600, 2500, 3900, 2000];
+        foreach ($cols as $idx => $colNum) {
+            $hRow2->addCell($colWidths[$idx], $headerCellStyle)->addText($colNum, ['name' => 'Arial', 'size' => 8.5, 'bold' => true], ['alignment' => 'center']);
+        }
+
+        // Data Rows
+        foreach ($gajiParuhWaktu as $index => $gaji) {
+            $rek = $gaji->no_rekening ?: ($gaji->pegawai->nomor_rekening ?? '-');
+            $nama = $gaji->nama ?: ($gaji->pegawai ? $gaji->pegawai->nama_lengkap_bergelar : '-');
+            $nominal = (float) $gaji->bersih;
+
+            $row = $detailTable->addRow();
+            $row->addCell(600)->addText((string) ($index + 1), ['name' => 'Arial', 'size' => 9], ['alignment' => 'center']);
+            $row->addCell(2500)->addText($rek, ['name' => 'Arial', 'size' => 9], ['alignment' => 'center']);
+            $row->addCell(3900)->addText($nama, ['name' => 'Arial', 'size' => 9]);
+            $row->addCell(2000)->addText(number_format($nominal, 0, ',', '.'), ['name' => 'Arial', 'size' => 9], ['alignment' => 'right']);
+        }
+
+        // Footer Row
+        $totRow = $detailTable->addRow();
+        $totRow->addCell(7000, array_merge($headerCellStyle, ['gridSpan' => 3]))->addText('TOTAL', ['name' => 'Arial', 'size' => 9.5, 'bold' => true], ['alignment' => 'center']);
+        $totRow->addCell(2000, $headerCellStyle)->addText(number_format($totalBersih, 0, ',', '.'), ['name' => 'Arial', 'size' => 9.5, 'bold' => true], ['alignment' => 'right']);
+
+        $section->addTextBreak(1);
+
+        // Tanda Tangan Lampiran
+        $ttdLampiranTable = $section->addTable($noBorderTableStyle);
+        $ttdLampiranRow = $ttdLampiranTable->addRow();
+        $ttdLampiranRow->addCell(4500);
+        $ttdLampiranCell = $ttdLampiranRow->addCell(4500);
+
+        $ttdLampiranCell->addText("Pekalongan, {$meta['tanggal_naskah']}", ['name' => 'Arial', 'size' => 11], ['alignment' => 'center']);
+        $ttdLampiranCell->addText('Ditandatangani secara elektronik oleh:', ['name' => 'Arial', 'size' => 11], ['alignment' => 'center']);
+        $ttdLampiranCell->addText($meta['jabatan_pengirim'], ['name' => 'Arial', 'size' => 11, 'bold' => true], ['alignment' => 'center']);
+        $ttdLampiranCell->addTextBreak(2);
+        $ttdLampiranCell->addText($meta['ttd_pengirim'], ['name' => 'Arial', 'size' => 11], ['alignment' => 'center']);
+        $ttdLampiranCell->addTextBreak(2);
+        $ttdLampiranCell->addText($meta['nama_pengirim'], ['name' => 'Arial', 'size' => 11, 'bold' => true, 'underline' => 'single'], ['alignment' => 'center']);
+        $ttdLampiranCell->addText("NIP. {$meta['nip_pengirim']}", ['name' => 'Arial', 'size' => 11], ['alignment' => 'center']);
+
+        return $phpWord;
+    }
 }

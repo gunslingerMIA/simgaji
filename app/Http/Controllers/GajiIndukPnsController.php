@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\PphTerCalculator;
+use App\Models\AppSetting;
 use App\Models\GajiIndukPns;
 use App\Models\Pegawai;
 use App\Models\RefGajiPokokPns;
@@ -231,6 +232,8 @@ class GajiIndukPnsController extends Controller
             GajiIndukPns::insert($chunk);
         }
 
+        AppSetting::set("pemindahbukuan_pns_saved_{$tahun}_{$bulan}", '0');
+
         return redirect()->route('gaji-induk-pns.index', ['bulan' => $bulan, 'tahun' => $tahun])
             ->with('success', 'Berhasil generate gaji PNS untuk bulan '.$bulan.' tahun '.$tahun);
     }
@@ -259,6 +262,8 @@ class GajiIndukPnsController extends Controller
         GajiIndukPns::where('bulan', $request->bulan)
             ->where('tahun', $request->tahun)
             ->update(['is_locked' => false]);
+
+        AppSetting::set("pemindahbukuan_pns_saved_{$request->tahun}_{$request->bulan}", '0');
 
         return redirect()->back()->with('success', 'Kunci data gaji bulan '.$request->bulan.' tahun '.$request->tahun.' berhasil dibuka.');
     }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\GajiIndukPppkParuhWaktu;
 use App\Models\Pegawai;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 
@@ -14,13 +15,18 @@ class GajiIndukPppkParuhWaktuController extends Controller
         $bulan = $request->query('bulan', date('m'));
         $tahun = $request->query('tahun', date('Y'));
 
+        $bulanPad = str_pad($bulan, 2, '0', STR_PAD_LEFT);
+        $namaBulan = Carbon::createFromDate((int) $tahun, (int) $bulan, 1)->translatedFormat('F');
+
         $gajiParuhWaktu = GajiIndukPppkParuhWaktu::with('pegawai')
-            ->where('bulan', $bulan)
+            ->where('bulan', $bulanPad)
             ->where('tahun', $tahun)
             ->orderBy('nama')
             ->get();
 
-        return view('gaji-induk-pppk-paruh-waktu.index', compact('gajiParuhWaktu', 'bulan', 'tahun'));
+        $meta = PemindahbukuanPppkParuhWaktuController::getMetaSettings($request, $bulanPad, $tahun, $namaBulan);
+
+        return view('gaji-induk-pppk-paruh-waktu.index', compact('gajiParuhWaktu', 'bulan', 'tahun', 'namaBulan', 'meta'));
     }
 
     public function create()

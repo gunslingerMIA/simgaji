@@ -53,6 +53,7 @@ Route::resource('pagu-anggaran', PaguAnggaranController::class)->except(['create
 
 use App\Http\Controllers\PemindahbukuanPnsController;
 use App\Http\Controllers\PemindahbukuanPppkController;
+use App\Http\Controllers\PemindahbukuanPppkParuhWaktuController;
 
 Route::post('gaji-induk-pns/lock', [GajiIndukPnsController::class, 'lock'])->name('gaji-induk-pns.lock');
 Route::post('gaji-induk-pns/unlock', [GajiIndukPnsController::class, 'unlock'])->name('gaji-induk-pns.unlock');
@@ -84,6 +85,12 @@ Route::resource('gaji-induk-pppk', GajiIndukPppkController::class)->only(['index
 
 Route::post('gaji-induk-pppk-paruh-waktu/lock', [GajiIndukPppkParuhWaktuController::class, 'lock'])->name('gaji-induk-pppk-paruh-waktu.lock');
 Route::post('gaji-induk-pppk-paruh-waktu/unlock', [GajiIndukPppkParuhWaktuController::class, 'unlock'])->name('gaji-induk-pppk-paruh-waktu.unlock');
+
+// Pemindahbukuan Rekening PPPK Paruh Waktu
+Route::post('gaji-induk-pppk-paruh-waktu/pemindahbukuan/setting', [PemindahbukuanPppkParuhWaktuController::class, 'saveSetting'])->name('gaji-induk-pppk-paruh-waktu.pemindahbukuan.setting');
+Route::get('gaji-induk-pppk-paruh-waktu/pemindahbukuan/export-word', [PemindahbukuanPppkParuhWaktuController::class, 'exportWord'])->name('gaji-induk-pppk-paruh-waktu.pemindahbukuan.export-word');
+Route::get('gaji-induk-pppk-paruh-waktu/pemindahbukuan/export-excel', [PemindahbukuanPppkParuhWaktuController::class, 'exportExcel'])->name('gaji-induk-pppk-paruh-waktu.pemindahbukuan.export-excel');
+
 Route::resource('gaji-induk-pppk-paruh-waktu', GajiIndukPppkParuhWaktuController::class)->only(['index', 'create', 'store', 'destroy']);
 
 Route::post('tpp/lock', [TppController::class, 'lock'])->name('tpp.lock');

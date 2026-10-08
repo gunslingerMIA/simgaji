@@ -38,7 +38,7 @@ class BudgetProjectionService
         $totalPppkPw = DB::table('gaji_induk_pppk_paruh_waktu')
             ->where('tahun', $tahun)
             ->where('bulan', $bulanPad)
-            ->sum('gaji_pokok');
+            ->sum('bruto');
 
         return (float) ($totalPns + $totalPppk + $totalPppkPw);
     }

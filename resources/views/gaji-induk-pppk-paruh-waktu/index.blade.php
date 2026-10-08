@@ -12,7 +12,18 @@
                         <h4 class="mb-1 text-primary"><i class="fa-solid fa-money-check-dollar me-2"></i>Data Gaji Induk PPPK Paruh Waktu</h4>
                         <p class="text-muted small mb-0">Menampilkan data gaji induk untuk bulan {{ str_pad($bulan, 2, '0', STR_PAD_LEFT) }} tahun {{ $tahun }}.</p>
                     </div>
-                    <div>
+                    <div class="d-flex gap-2 flex-wrap align-items-center">
+                        @if(count($gajiParuhWaktu) > 0 && $gajiParuhWaktu->first()->is_locked)
+                            <button type="button" class="btn btn-outline-primary fw-semibold" data-bs-toggle="modal" data-bs-target="#modalSettingNaskah">
+                                <i class="fa-solid fa-file-pen me-1"></i> Setting Naskah
+                            </button>
+                            <a href="{{ route('gaji-induk-pppk-paruh-waktu.pemindahbukuan.export-word', ['bulan' => $bulan, 'tahun' => $tahun]) }}" class="btn btn-primary fw-semibold">
+                                <i class="fa-solid fa-file-word me-1"></i> Download Word (.docx)
+                            </a>
+                            <a href="{{ route('gaji-induk-pppk-paruh-waktu.pemindahbukuan.export-excel', ['bulan' => $bulan, 'tahun' => $tahun]) }}" class="btn btn-success fw-semibold">
+                                <i class="fa-solid fa-file-excel me-1"></i> Export Excel (2 Sheet)
+                            </a>
+                        @endif
                         <a href="{{ route('gaji-induk-pppk-paruh-waktu.create') }}" class="btn btn-primary">
                             <i class="fa-solid fa-plus me-1"></i> Generate Gaji
                         </a>
@@ -318,6 +329,83 @@
                 </div>
             @endif
         </div>
+    </div>
+</div>
+
+<!-- Modal Setting Naskah & Placeholder PPPK Paruh Waktu -->
+<div class="modal fade" id="modalSettingNaskah" tabindex="-1" aria-labelledby="modalSettingNaskahLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <form action="{{ route('gaji-induk-pppk-paruh-waktu.pemindahbukuan.setting') }}" method="POST">
+            @csrf
+            <input type="hidden" name="bulan" value="{{ $bulan }}">
+            <input type="hidden" name="tahun" value="{{ $tahun }}">
+
+            <div class="modal-content">
+                <div class="modal-header bg-primary bg-opacity-10">
+                    <h5 class="modal-title fw-bold text-primary" id="modalSettingNaskahLabel">
+                        <i class="fa-solid fa-file-pen me-2"></i>Pengaturan Naskah & Nomor Rekening Pemindahbukuan PPPK Paruh Waktu
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="alert alert-info small mb-3">
+                        <i class="fa-solid fa-info-circle me-1"></i> Pengaturan nomor rekening dan metadata penandatangan akan <strong>tersimpan secara permanen</strong> dan otomatis diterapkan saat mendownload dokumen <strong>Word (.docx)</strong> dan <strong>Excel (.xlsx)</strong>.
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">Nomor Naskah</label>
+                            <input type="text" class="form-control" name="nomor_naskah" value="{{ $meta['nomor_naskah'] }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">Tanggal Naskah</label>
+                            <input type="text" class="form-control" name="tanggal_naskah" value="{{ $meta['tanggal_naskah'] }}">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">Nomor Rekening Dinas</label>
+                            <input type="text" class="form-control" name="nomor_rekening_dinas" value="{{ $meta['nomor_rekening_dinas'] }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">Nama Bank Tujuan</label>
+                            <input type="text" class="form-control" name="nama_bank" value="{{ $meta['nama_bank'] }}">
+                        </div>
+
+                        <div class="col-md-12">
+                            <label class="form-label small fw-bold">Jabatan Penandatangan / Pengirim</label>
+                            <input type="text" class="form-control" name="jabatan_pengirim" value="{{ $meta['jabatan_pengirim'] }}">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">Nama Pejabat / Kepala Dinas</label>
+                            <input type="text" class="form-control fw-semibold" name="nama_pengirim" value="{{ $meta['nama_pengirim'] }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">NIP Pejabat</label>
+                            <input type="text" class="form-control" name="nip_pengirim" value="{{ $meta['nip_pengirim'] }}">
+                        </div>
+
+                        <div class="col-md-12">
+                            <label class="form-label small fw-bold">Placeholder TTE</label>
+                            <input type="text" class="form-control" name="ttd_pengirim" value="{{ $meta['ttd_pengirim'] }}">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer d-flex justify-content-between">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-success fw-bold px-3">
+                            <i class="fa-solid fa-floppy-disk me-1"></i> Simpan Pengaturan
+                        </button>
+                        @if(count($gajiParuhWaktu) > 0 && $gajiParuhWaktu->first()->is_locked)
+                            <button type="submit" formaction="{{ route('gaji-induk-pppk-paruh-waktu.pemindahbukuan.export-word') }}" formmethod="GET" formtarget="_self" class="btn btn-primary fw-bold px-3">
+                                <i class="fa-solid fa-file-word me-1"></i> Download Word (.docx)
+                            </button>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        </form>
     </div>
 </div>
 

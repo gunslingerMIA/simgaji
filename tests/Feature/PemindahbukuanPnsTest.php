@@ -192,3 +192,40 @@ it('can render single and mass slip gaji ASN', function () {
     $responseAll->assertSee('SLIP GAJI ASN');
     $responseAll->assertSee('Harry Rudiyanto, S.Kom, M.M');
 });
+
+it('shows pemindahbukuan button on pns index only when data is locked and shows export buttons only after saved', function () {
+    // 1. Unlocked state on PNS index -> Pemindahbukuan button NOT visible
+    $this->gaji->update(['is_locked' => false]);
+    $resIndex = $this->get(route('gaji-induk-pns.index', ['bulan' => '10', 'tahun' => '2026']));
+    $resIndex->assertDontSee('Pemindahbukuan Rekening');
+
+    // 2. Locked state on PNS index -> Pemindahbukuan button IS visible
+    $this->gaji->update(['is_locked' => true]);
+    $resIndexLocked = $this->get(route('gaji-induk-pns.index', ['bulan' => '10', 'tahun' => '2026']));
+    $resIndexLocked->assertSee('Pemindahbukuan Rekening');
+
+    // 3. Before clicking simpan in Pemindahbukuan -> Export buttons NOT visible, Note is visible
+    AppSetting::set('pemindahbukuan_pns_saved_2026_10', '0');
+    $resPem = $this->get(route('gaji-induk-pns.pemindahbukuan.index', ['bulan' => '10', 'tahun' => '2026']));
+    $resPem->assertDontSee('Download Word (.docx)');
+    $resPem->assertDontSee('Export Excel (2 Sheet)');
+    $resPem->assertSee('Simpan Perubahan');
+
+    // 4. After clicking simpan in Pemindahbukuan -> Export buttons ARE visible
+    $this->post(route('gaji-induk-pns.pemindahbukuan.update'), [
+        'bulan' => '10',
+        'tahun' => '2026',
+        'items' => [
+            [
+                'id' => $this->gaji->id,
+                'potongan_zakat' => 172800,
+                'potongan_infaq' => 0,
+                'potongan_korpri' => 0,
+            ],
+        ],
+    ]);
+
+    $resPemSaved = $this->get(route('gaji-induk-pns.pemindahbukuan.index', ['bulan' => '10', 'tahun' => '2026']));
+    $resPemSaved->assertSee('Download Word (.docx)');
+    $resPemSaved->assertSee('Export Excel (2 Sheet)');
+});

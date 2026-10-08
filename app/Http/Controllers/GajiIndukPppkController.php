@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\PphTerCalculator;
+use App\Models\AppSetting;
 use App\Models\GajiIndukPppk;
 use App\Models\Pegawai;
 use App\Models\RefGajiPokokPppk;
@@ -213,6 +214,8 @@ class GajiIndukPppkController extends Controller
             GajiIndukPppk::insert($chunk);
         }
 
+        AppSetting::set("pemindahbukuan_pppk_saved_{$tahun}_{$bulan}", '0');
+
         return redirect()->route('gaji-induk-pppk.index', ['bulan' => $bulan, 'tahun' => $tahun])
             ->with('success', 'Berhasil generate gaji PPPK untuk bulan '.$bulan.' tahun '.$tahun);
     }
@@ -241,6 +244,8 @@ class GajiIndukPppkController extends Controller
         GajiIndukPppk::where('bulan', $request->bulan)
             ->where('tahun', $request->tahun)
             ->update(['is_locked' => false]);
+
+        AppSetting::set("pemindahbukuan_pppk_saved_{$request->tahun}_{$request->bulan}", '0');
 
         return redirect()->back()->with('success', 'Kunci data gaji bulan '.$request->bulan.' tahun '.$request->tahun.' berhasil dibuka.');
     }
