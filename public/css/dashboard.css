@@ -141,6 +141,10 @@ body {
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
 }
 
+body.modal-open .card {
+    transform: none !important;
+}
+
 .stat-icon {
     width: 48px;
     height: 48px;

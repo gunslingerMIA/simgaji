@@ -25,8 +25,9 @@ class GajiTambahanPppkController extends Controller
 
         $isLocked = $gajiTambahan->isNotEmpty() && $gajiTambahan->first()->is_locked;
         $bulanCair = $gajiTambahan->isNotEmpty() ? $gajiTambahan->first()->bulan_cair : date('m');
+        $meta = PemindahbukuanGajiTambahanController::getMetaSettings($request, 'pppk', $jenis, $tahunCair);
 
-        return view('gaji-tambahan-pppk.index', compact('gajiTambahan', 'jenis', 'bulanCair', 'tahunCair', 'isLocked'));
+        return view('gaji-tambahan-pppk.index', compact('gajiTambahan', 'jenis', 'bulanCair', 'tahunCair', 'isLocked', 'meta'));
     }
 
     public function create()

@@ -93,9 +93,18 @@ Route::get('gaji-induk-pppk-paruh-waktu/pemindahbukuan/export-excel', [Pemindahb
 
 Route::resource('gaji-induk-pppk-paruh-waktu', GajiIndukPppkParuhWaktuController::class)->only(['index', 'create', 'store', 'destroy']);
 
+use App\Http\Controllers\PemindahbukuanGajiTambahanController;
+use App\Http\Controllers\PemindahbukuanTppController;
+
 Route::post('tpp/lock', [TppController::class, 'lock'])->name('tpp.lock');
 Route::post('tpp/unlock', [TppController::class, 'unlock'])->name('tpp.unlock');
 Route::post('tpp/sync-historis', [TppController::class, 'syncHistoris'])->name('tpp.sync-historis');
+
+// Pemindahbukuan Rekening TPP ASN
+Route::post('tpp/pemindahbukuan/setting', [PemindahbukuanTppController::class, 'saveSetting'])->name('tpp.pemindahbukuan.setting');
+Route::get('tpp/pemindahbukuan/export-word', [PemindahbukuanTppController::class, 'exportWord'])->name('tpp.pemindahbukuan.export-word');
+Route::get('tpp/pemindahbukuan/export-excel', [PemindahbukuanTppController::class, 'exportExcel'])->name('tpp.pemindahbukuan.export-excel');
+
 Route::resource('tpp', TppController::class)->only(['index', 'create', 'store', 'update', 'destroy']);
 
 Route::post('gaji-tambahan-pns/lock', [GajiTambahanPnsController::class, 'lock'])->name('gaji-tambahan-pns.lock');
@@ -109,6 +118,11 @@ Route::resource('gaji-tambahan-pppk', GajiTambahanPppkController::class)->only([
 Route::post('gaji-tambahan-pppk-paruh-waktu/lock', [GajiTambahanPppkParuhWaktuController::class, 'lock'])->name('gaji-tambahan-pppk-paruh-waktu.lock');
 Route::post('gaji-tambahan-pppk-paruh-waktu/unlock', [GajiTambahanPppkParuhWaktuController::class, 'unlock'])->name('gaji-tambahan-pppk-paruh-waktu.unlock');
 Route::resource('gaji-tambahan-pppk-paruh-waktu', GajiTambahanPppkParuhWaktuController::class)->only(['index', 'create', 'store', 'update', 'destroy']);
+
+// Pemindahbukuan Rekening Gaji Tambahan (Gaji 13 & 14)
+Route::post('gaji-tambahan/pemindahbukuan/setting', [PemindahbukuanGajiTambahanController::class, 'saveSetting'])->name('gaji-tambahan.pemindahbukuan.setting');
+Route::get('gaji-tambahan/pemindahbukuan/export-word', [PemindahbukuanGajiTambahanController::class, 'exportWord'])->name('gaji-tambahan.pemindahbukuan.export-word');
+Route::get('gaji-tambahan/pemindahbukuan/export-excel', [PemindahbukuanGajiTambahanController::class, 'exportExcel'])->name('gaji-tambahan.pemindahbukuan.export-excel');
 
 // Rapel Gaji Routes
 Route::get('rapel/cetak-rekap', [RapelController::class, 'cetakRekap'])->name('rapel.cetak-rekap');

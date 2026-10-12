@@ -7,6 +7,7 @@ use App\Models\GajiIndukPppk;
 use App\Models\Pegawai;
 use App\Models\RefJabatan;
 use App\Models\Tpp;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class TppController extends Controller
@@ -15,6 +16,9 @@ class TppController extends Controller
     {
         $bulan = $request->query('bulan', date('m'));
         $tahun = $request->query('tahun', date('Y'));
+
+        $bulanPad = str_pad($bulan, 2, '0', STR_PAD_LEFT);
+        $namaBulan = Carbon::createFromDate((int) $tahun, (int) $bulan, 1)->translatedFormat('F');
 
         // Urutkan berdasarkan kelas jabatan tertinggi ke terendah secara numerik, lalu nama
         $tppList = Tpp::with('pegawai')
@@ -25,8 +29,9 @@ class TppController extends Controller
 
         $refJabatanList = RefJabatan::with('kelasJabatan')->orderBy('nama_jabatan')->get();
         $isLocked = $tppList->isNotEmpty() && $tppList->first()->is_locked;
+        $meta = PemindahbukuanTppController::getMetaSettings($request, $bulanPad, $tahun, $namaBulan);
 
-        return view('tpp.index', compact('tppList', 'refJabatanList', 'bulan', 'tahun', 'isLocked'));
+        return view('tpp.index', compact('tppList', 'refJabatanList', 'bulan', 'tahun', 'isLocked', 'meta'));
     }
 
     public function create()

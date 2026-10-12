@@ -16,7 +16,18 @@
                         <h4 class="mb-1 text-primary"><i class="fa-solid fa-hand-holding-dollar me-2"></i>Data Tambahan Penghasilan Pegawai (TPP)</h4>
                         <p class="text-muted small mb-0">Menampilkan daftar penerimaan TPP periode bulan {{ str_pad($bulan, 2, '0', STR_PAD_LEFT) }} tahun {{ $tahun }}.</p>
                     </div>
-                    <div>
+                    <div class="d-flex gap-2 flex-wrap align-items-center">
+                        @if(count($tppList) > 0 && $isLocked)
+                            <button type="button" class="btn btn-outline-primary fw-semibold" data-bs-toggle="modal" data-bs-target="#modalSettingNaskah">
+                                <i class="fa-solid fa-file-pen me-1"></i> Setting Naskah
+                            </button>
+                            <a href="{{ route('tpp.pemindahbukuan.export-word', ['bulan' => $bulan, 'tahun' => $tahun]) }}" class="btn btn-primary fw-semibold">
+                                <i class="fa-solid fa-file-word me-1"></i> Download Word (.docx)
+                            </a>
+                            <a href="{{ route('tpp.pemindahbukuan.export-excel', ['bulan' => $bulan, 'tahun' => $tahun]) }}" class="btn btn-success fw-semibold">
+                                <i class="fa-solid fa-file-excel me-1"></i> Export Excel (2 Sheet)
+                            </a>
+                        @endif
                         <a href="{{ route('tpp.create') }}" class="btn btn-primary">
                             <i class="fa-solid fa-plus me-1"></i> Generate TPP
                         </a>
@@ -151,36 +162,6 @@
                             </div>
                         </div>
                     </form>
-
-                    <!-- Modal Sinkronisasi Historis per Tanggal -->
-                    <div class="modal fade" id="modalSyncHistoris" tabindex="-1" aria-hidden="true">
-                      <div class="modal-dialog modal-dialog-centered">
-                        <div class="modal-content">
-                          <div class="modal-header border-bottom-0">
-                            <h5 class="modal-title fw-bold"><i class="fa-solid fa-clock-rotate-left me-2 text-primary"></i>Tarik Data Pegawai per Tanggal</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                          </div>
-                          <form action="{{ route('tpp.sync-historis') }}" method="POST">
-                              @csrf
-                              <input type="hidden" name="bulan" value="{{ $bulan }}">
-                              <input type="hidden" name="tahun" value="{{ $tahun }}">
-                              <div class="modal-body">
-                                  <p class="text-muted small">
-                                      Fitur ini akan memperbarui jabatan, kelas jabatan, dan nominal TPP seluruh pegawai sesuai riwayat kepegawaian yang aktif pada tanggal yang dipilih.
-                                  </p>
-                                  <div class="mb-3">
-                                      <label class="form-label fw-semibold">Pilih Tanggal Cut-Off Riwayat <span class="text-danger">*</span></label>
-                                      <input type="date" name="tanggal_cut_off" class="form-control" required value="{{ $tahun }}-{{ $bulan }}-01">
-                                  </div>
-                              </div>
-                              <div class="modal-footer border-top-0">
-                                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
-                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-rotate me-1"></i> Sinkronkan Sekarang</button>
-                              </div>
-                          </form>
-                        </div>
-                      </div>
-                    </div>
 
                     <!-- Hidden Forms for Lock/Unlock actions -->
                     @if(count($tppList) > 0)
@@ -437,6 +418,116 @@
                 </div>
             @endif
         </div>
+    </div>
+</div>
+
+<!-- Modal Sinkronisasi Historis per Tanggal -->
+<div class="modal fade" id="modalSyncHistoris" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header border-bottom-0">
+        <h5 class="modal-title fw-bold"><i class="fa-solid fa-clock-rotate-left me-2 text-primary"></i>Tarik Data Pegawai per Tanggal</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form action="{{ route('tpp.sync-historis') }}" method="POST">
+          @csrf
+          <input type="hidden" name="bulan" value="{{ $bulan }}">
+          <input type="hidden" name="tahun" value="{{ $tahun }}">
+          <div class="modal-body">
+              <p class="text-muted small">
+                  Fitur ini akan memperbarui jabatan, kelas jabatan, dan nominal TPP seluruh pegawai sesuai riwayat kepegawaian yang aktif pada tanggal yang dipilih.
+              </p>
+              <div class="mb-3">
+                  <label class="form-label fw-semibold">Pilih Tanggal Cut-Off Riwayat <span class="text-danger">*</span></label>
+                  <input type="date" name="tanggal_cut_off" class="form-control" required value="{{ $tahun }}-{{ $bulan }}-01">
+              </div>
+          </div>
+          <div class="modal-footer border-top-0">
+            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
+            <button type="submit" class="btn btn-primary"><i class="fa-solid fa-rotate me-1"></i> Sinkronkan Sekarang</button>
+          </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Setting Naskah & Nomor Rekening Pemindahbukuan TPP ASN -->
+<div class="modal fade" id="modalSettingNaskah" tabindex="-1" aria-labelledby="modalSettingNaskahLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <form action="{{ route('tpp.pemindahbukuan.setting') }}" method="POST">
+            @csrf
+            <input type="hidden" name="bulan" value="{{ $bulan }}">
+            <input type="hidden" name="tahun" value="{{ $tahun }}">
+
+            <div class="modal-content">
+                <div class="modal-header bg-primary bg-opacity-10">
+                    <h5 class="modal-title fw-bold text-primary" id="modalSettingNaskahLabel">
+                        <i class="fa-solid fa-file-pen me-2"></i>Pengaturan Naskah & Nomor Rekening Pemindahbukuan TPP ASN
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="alert alert-info small mb-3">
+                        <i class="fa-solid fa-info-circle me-1"></i> Pengaturan nomor rekening dan metadata penandatangan akan <strong>tersimpan secara permanen</strong> dan otomatis diterapkan saat mendownload dokumen <strong>Word (.docx)</strong> dan <strong>Excel (.xlsx)</strong>.
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">Nomor Naskah</label>
+                            <input type="text" class="form-control" name="nomor_naskah" value="{{ $meta['nomor_naskah'] ?? '${nomor_naskah}' }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">Tanggal Naskah</label>
+                            <input type="text" class="form-control" name="tanggal_naskah" value="{{ $meta['tanggal_naskah'] ?? '${tanggal_naskah}' }}">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">Nomor Rekening Dinas</label>
+                            <input type="text" class="form-control" name="nomor_rekening_dinas" value="{{ $meta['nomor_rekening_dinas'] ?? '2.007.07892.0' }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">Nama Bank Tujuan</label>
+                            <input type="text" class="form-control" name="nama_bank" value="{{ $meta['nama_bank'] ?? 'Bank Jateng' }}">
+                        </div>
+
+                        <div class="col-md-12">
+                            <label class="form-label small fw-bold">Jabatan Penandatangan / Pengirim</label>
+                            <input type="text" class="form-control" name="jabatan_pengirim" value="{{ $meta['jabatan_pengirim'] ?? 'KEPALA DINAS PENANAMAN MODAL DAN PELAYANAN TERPADU SATU PINTU KOTA PEKALONGAN' }}">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">Nama Pejabat / Kepala Dinas</label>
+                            <input type="text" class="form-control fw-semibold" name="nama_pengirim" value="{{ $meta['nama_pengirim'] ?? 'ADE SUANGKAT, S.E' }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">NIP Pejabat</label>
+                            <input type="text" class="form-control" name="nip_pengirim" value="{{ $meta['nip_pengirim'] ?? '197006161989031001' }}">
+                        </div>
+
+                        <div class="col-md-12">
+                            <label class="form-label small fw-bold">Placeholder TTE</label>
+                            <input type="text" class="form-control" name="ttd_pengirim" value="{{ $meta['ttd_pengirim'] ?? '${ttd_pengirim}' }}">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer d-flex justify-content-between">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-success fw-bold px-3">
+                            <i class="fa-solid fa-floppy-disk me-1"></i> Simpan Pengaturan
+                        </button>
+                        @if(count($tppList) > 0 && $isLocked)
+                            <button type="submit" formaction="{{ route('tpp.pemindahbukuan.export-word') }}" formmethod="GET" formtarget="_self" class="btn btn-primary fw-bold px-3">
+                                <i class="fa-solid fa-file-word me-1"></i> Download Word (.docx)
+                            </button>
+                            <button type="submit" formaction="{{ route('tpp.pemindahbukuan.export-excel') }}" formmethod="GET" formtarget="_self" class="btn btn-success fw-bold px-3">
+                                <i class="fa-solid fa-file-excel me-1"></i> Export Excel (2 Sheet)
+                            </button>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        </form>
     </div>
 </div>
 
