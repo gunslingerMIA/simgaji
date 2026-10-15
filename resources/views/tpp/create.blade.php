@@ -19,6 +19,7 @@
                             <ul class="mb-0 ps-3 mt-1 small">
                                 <li>Hanya mencakup pegawai <strong>PNS</strong> dan <strong>PPPK Penuh Waktu</strong> aktif (PPPK Paruh Waktu tidak mendapatkan TPP).</li>
                                 <li>Komponen TPP dibagi: <strong>Beban Kerja 40%</strong> dan <strong>Prestasi Kerja 60%</strong> (18% e-Presensi, 30% e-Kinerja, 12% Seksama).</li>
+                                <li>Mulai <strong>Oktober 2026</strong>, Pejabat Administrator/Eselon III (Sekretaris) yang belum memiliki <strong>Sertifikat PBJ Level 1</strong> dikenakan potongan <strong>10%</strong>. Jika memiliki PBJ Level 1 namun belum memiliki <strong>Sertifikat PPK Tipe C</strong>, dikenakan potongan <strong>5%</strong>.</li>
                                 <li>Mengambil referensi historis jabatan dan gaji induk bulan yang sama untuk perhitungan batas iuran BPJS Kesehatan (Pagu maks Rp 12.000.000).</li>
                                 <li>Data yang sudah ada untuk periode bulan & tahun yang sama akan digenerate ulang (replace).</li>
                             </ul>

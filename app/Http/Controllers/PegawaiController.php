@@ -88,10 +88,14 @@ class PegawaiController extends Controller
             'nama_bank' => 'required|string|max:100',
             'nama_pada_rekening' => 'required|string|max:255',
             'ptkp_status' => 'required|string|max:50',
+            'sertifikat_pbj' => 'nullable|boolean',
+            'sertifikat_ppk' => 'nullable|boolean',
         ]);
 
         $validated['is_active'] = $request->has('is_active');
         $validated['is_penyetaraan'] = $request->boolean('is_penyetaraan');
+        $validated['sertifikat_pbj'] = $request->boolean('sertifikat_pbj');
+        $validated['sertifikat_ppk'] = $request->boolean('sertifikat_ppk');
         $validated['npwp'] = $validated['nik'];
         $validated['mkg_tahun'] = $validated['mkg_tahun'] ?? 0;
         $validated['mkg_bulan'] = $validated['mkg_bulan'] ?? 0;
@@ -134,19 +138,24 @@ class PegawaiController extends Controller
             $gajiPokok = $pegawai->gaji_kontrak;
         } else {
             // Hitung MKG
-            $now = Carbon::now();
-            $tmt = $pegawai->tmt_kgb_terakhir ?? $pegawai->tmt_pangkat_terakhir;
+            $now = Carbon::now()->startOfMonth();
+            $tmtPangkat = $pegawai->tmt_pangkat_terakhir ? Carbon::parse($pegawai->tmt_pangkat_terakhir)->startOfMonth() : null;
+            $tmtKgb = $pegawai->tmt_kgb_terakhir ? Carbon::parse($pegawai->tmt_kgb_terakhir)->startOfMonth() : null;
 
-            $diffInMonths = 0;
-            if ($tmt) {
-                $tmtDate = Carbon::parse($tmt);
-                if ($now->greaterThan($tmtDate)) {
-                    $diffInMonths = $tmtDate->diffInMonths($now);
-                }
+            $tmt = null;
+            if ($tmtPangkat && $tmtKgb) {
+                $tmt = $tmtPangkat->greaterThan($tmtKgb) ? $tmtPangkat : $tmtKgb;
+            } else {
+                $tmt = $tmtPangkat ?? $tmtKgb ?? ($pegawai->tmt_cpns ? Carbon::parse($pegawai->tmt_cpns)->startOfMonth() : null);
             }
 
-            $totalMonths = ((int) $pegawai->mkg_tahun * 12) + (int) $pegawai->mkg_bulan + $diffInMonths;
-            $currentMkgTahun = floor($totalMonths / 12);
+            $diffInMonths = 0;
+            if ($tmt && $now->greaterThanOrEqualTo($tmt)) {
+                $diffInMonths = (int) $tmt->diffInMonths($now);
+            }
+
+            $totalMonths = ((int) $pegawai->mkg_tahun * 12) + (int) ($pegawai->mkg_bulan ?? 0) + $diffInMonths;
+            $currentMkgTahun = (int) floor($totalMonths / 12);
 
             if (in_array($pegawai->status_kepegawaian, ['pns', 'cpns'])) {
                 $refGaji = RefGajiPokokPns::where('golongan', $pegawai->golongan)
@@ -229,10 +238,14 @@ class PegawaiController extends Controller
             'nama_bank' => 'required|string|max:100',
             'nama_pada_rekening' => 'required|string|max:255',
             'ptkp_status' => 'required|string|max:50',
+            'sertifikat_pbj' => 'nullable|boolean',
+            'sertifikat_ppk' => 'nullable|boolean',
         ]);
 
         $validated['is_active'] = $request->has('is_active');
         $validated['is_penyetaraan'] = $request->boolean('is_penyetaraan');
+        $validated['sertifikat_pbj'] = $request->boolean('sertifikat_pbj');
+        $validated['sertifikat_ppk'] = $request->boolean('sertifikat_ppk');
         $validated['npwp'] = $validated['nik'];
 
         $pegawai->update($validated);
@@ -326,21 +339,26 @@ class PegawaiController extends Controller
     {
         $pegawai = Pegawai::with(['jabatan', 'pasangan', 'anak', 'riwayat.jabatan'])->findOrFail($id);
 
-        $now = Carbon::now();
-        // Base on TMT KGB if available, else TMT Pangkat
-        $tmt = $pegawai->tmt_kgb_terakhir ?? $pegawai->tmt_pangkat_terakhir;
+        $now = Carbon::now()->startOfMonth();
+        $tmtPangkat = $pegawai->tmt_pangkat_terakhir ? Carbon::parse($pegawai->tmt_pangkat_terakhir)->startOfMonth() : null;
+        $tmtKgb = $pegawai->tmt_kgb_terakhir ? Carbon::parse($pegawai->tmt_kgb_terakhir)->startOfMonth() : null;
 
-        $diffInMonths = 0;
-        if ($tmt) {
-            $tmtDate = Carbon::parse($tmt);
-            if ($now->greaterThan($tmtDate)) {
-                $diffInMonths = $tmtDate->diffInMonths($now);
-            }
+        // Ambil TMT paling mutakhir antara KGB dan Pangkat sebagai acuan
+        $tmt = null;
+        if ($tmtPangkat && $tmtKgb) {
+            $tmt = $tmtPangkat->greaterThan($tmtKgb) ? $tmtPangkat : $tmtKgb;
+        } else {
+            $tmt = $tmtPangkat ?? $tmtKgb ?? ($pegawai->tmt_cpns ? Carbon::parse($pegawai->tmt_cpns)->startOfMonth() : null);
         }
 
-        $totalMonths = ((int) $pegawai->mkg_tahun * 12) + (int) $pegawai->mkg_bulan + $diffInMonths;
-        $currentMkgTahun = floor($totalMonths / 12);
-        $currentMkgBulan = $totalMonths % 12;
+        $diffInMonths = 0;
+        if ($tmt && $now->greaterThanOrEqualTo($tmt)) {
+            $diffInMonths = (int) $tmt->diffInMonths($now);
+        }
+
+        $totalMonths = ((int) $pegawai->mkg_tahun * 12) + (int) ($pegawai->mkg_bulan ?? 0) + $diffInMonths;
+        $currentMkgTahun = (int) floor($totalMonths / 12);
+        $currentMkgBulan = (int) ($totalMonths % 12);
 
         $gajiPokok = 0;
         if ($pegawai->status_kepegawaian === 'pppk_paruh_waktu') {

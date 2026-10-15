@@ -61,9 +61,9 @@ class SuratPengantarPppkParuhWaktuSheet implements FromView, WithColumnWidths, W
             'A' => 15,
             'B' => 3,
             'C' => 36,
-            'D' => 18,
+            'D' => 10,
             'E' => 5,
-            'F' => 20,
+            'F' => 18,
         ];
     }
 
@@ -80,12 +80,14 @@ class SuratPengantarPppkParuhWaktuSheet implements FromView, WithColumnWidths, W
         for ($i = 1; $i <= 6; $i++) {
             $sheet->getRowDimension($i)->setRowHeight(18);
         }
-        $sheet->getRowDimension(7)->setRowHeight(10);
 
         // Adjust row heights for merged multiline paragraphs
-        $sheet->getRowDimension(11)->setRowHeight(28);
-        $sheet->getRowDimension(18)->setRowHeight(40);
-        $sheet->getRowDimension(24)->setRowHeight(28);
-        $sheet->getRowDimension(26)->setRowHeight(24);
+        $sheet->getRowDimension(10)->setRowHeight(45);//Hal
+        $sheet->getRowDimension(19)->setRowHeight(30);//instruksi
+        $sheet->getStyle('A10:F10')->getAlignment()->setVertical(Alignment::VERTICAL_TOP); 
+        $sheet->getRowDimension(16)->setRowHeight(50); // Paragraf Pembuka
+        $sheet->getStyle("A1:F33")->getAlignment()->setWrapText(true);
+        $sheet->getRowDimension(22)->setRowHeight(28); // Terbilang
+        $sheet->getRowDimension(24)->setRowHeight(24); // Penutup
     }
 }

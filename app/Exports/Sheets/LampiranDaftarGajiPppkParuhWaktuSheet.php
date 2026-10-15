@@ -47,5 +47,6 @@ class LampiranDaftarGajiPppkParuhWaktuSheet implements FromView, WithColumnWidth
     {
         $sheet->getParent()->getDefaultStyle()->getFont()->setName('Arial')->setSize(9.5);
         $sheet->getStyle('A1:D100')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+        $sheet->getStyle('A1:D100')->getAlignment()->setWrapText(true);
     }
 }

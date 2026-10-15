@@ -202,7 +202,7 @@
                                     <th rowspan="2">Kelas Jab</th>
                                     <th rowspan="2" style="min-width: 150px;">Status / Kondisi</th>
                                     <th colspan="4">Tambahan Penghasilan (Rp)</th>
-                                    <th colspan="3">Persentase Potongan (%)</th>
+                                    <th colspan="4">Persentase Potongan (%)</th>
                                     <th rowspan="2">Total Potongan (Rp)</th>
                                     <th rowspan="2" class="bg-primary bg-opacity-10 text-primary">TPP Kotor (Rp)</th>
                                     <th rowspan="2">Pajak (Rp)</th>
@@ -219,6 +219,7 @@
                                     <th style="min-width: 65px;">e-Presensi</th>
                                     <th style="min-width: 65px;">e-Kinerja</th>
                                     <th style="min-width: 65px;">Seksama</th>
+                                    <th style="min-width: 75px;">Sertifikasi</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -285,6 +286,15 @@
                                                 <span class="{{ $tpp->persen_potongan_seksama > 0 ? 'text-danger fw-bold' : 'text-muted' }}">{{ (float)$tpp->persen_potongan_seksama }}%</span>
                                             @endif
                                         </td>
+                                        <td class="text-center">
+                                            @if((float)$tpp->persen_potongan_sertifikasi > 0)
+                                                <span class="badge bg-danger text-white px-2 py-1" title="Potongan Sertifikasi PBJ/PPK: Rp {{ number_format($tpp->nominal_potongan_sertifikasi, 0, ',', '.') }}">
+                                                    -{{ (float)$tpp->persen_potongan_sertifikasi }}%
+                                                </span>
+                                            @else
+                                                <span class="text-muted" style="font-size: 0.85em;">0%</span>
+                                            @endif
+                                        </td>
 
                                         <!-- Total Potongan -->
                                         <td class="text-end col-tot-potongan {{ $tpp->total_potongan > 0 ? 'text-danger fw-bold' : '' }}" data-val="{{ $tpp->total_potongan }}">
@@ -336,7 +346,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="18" class="text-center py-4 text-muted">Belum ada data TPP untuk periode ini. Silakan klik tombol <strong>Generate TPP</strong> di atas.</td>
+                                        <td colspan="19" class="text-center py-4 text-muted">Belum ada data TPP untuk periode ini. Silakan klik tombol <strong>Generate TPP</strong> di atas.</td>
                                     </tr>
                                 @endforelse
                             </tbody>
@@ -348,7 +358,7 @@
                                     <td id="foot-presensi">{{ number_format($tppList->sum('tpp_presensi'), 0, ',', '.') }}</td>
                                     <td id="foot-kinerja">{{ number_format($tppList->sum('tpp_kinerja'), 0, ',', '.') }}</td>
                                     <td id="foot-seksama">{{ number_format($tppList->sum('tpp_seksama'), 0, ',', '.') }}</td>
-                                    <td colspan="3" class="text-center">-</td>
+                                    <td colspan="4" class="text-center">-</td>
                                     <td class="text-danger" id="foot-tot-potongan">{{ number_format($tppList->sum('total_potongan'), 0, ',', '.') }}</td>
                                     <td class="bg-primary bg-opacity-10 text-primary" id="foot-kotor">{{ number_format($tppList->sum('tpp_kotor'), 0, ',', '.') }}</td>
                                     <td id="foot-pajak">{{ number_format($tppList->sum('potongan_pajak'), 0, ',', '.') }}</td>

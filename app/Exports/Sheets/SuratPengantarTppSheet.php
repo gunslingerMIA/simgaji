@@ -65,9 +65,9 @@ class SuratPengantarTppSheet implements FromView, WithColumnWidths, WithDrawings
             'A' => 15,
             'B' => 3,
             'C' => 36,
-            'D' => 18,
+            'D' => 10,
             'E' => 5,
-            'F' => 20,
+            'F' => 18,
         ];
     }
 
@@ -87,9 +87,9 @@ class SuratPengantarTppSheet implements FromView, WithColumnWidths, WithDrawings
         $sheet->getRowDimension(7)->setRowHeight(10);
 
         // Adjust row heights for merged multiline paragraphs
-        $sheet->getRowDimension(11)->setRowHeight(28); // Hal
+        // $sheet->getRowDimension(11)->setRowHeight(28); // Hal
         $sheet->getRowDimension(18)->setRowHeight(40); // Paragraf Pembuka
-        $sheet->getRowDimension(25)->setRowHeight(28); // Terbilang
-        $sheet->getRowDimension(27)->setRowHeight(24); // Penutup
+        $sheet->getRowDimension(27)->setRowHeight(28); // Terbilang
+        $sheet->getRowDimension(29)->setRowHeight(24); // Penutup
     }
 }

@@ -150,6 +150,7 @@ class PemindahbukuanWordService
             'alignment' => 'center',
             'cellMarginTop' => 30,
             'cellMarginBottom' => 30,
+            'cellMarginRight' =>120,
         ]));
 
         // Row 1: Penerimaan Gaji Bersih /Net Masuk Rekening
@@ -203,13 +204,13 @@ class PemindahbukuanWordService
         $ttdRow->addCell(4500); // Empty left spacer
         $ttdCell = $ttdRow->addCell(4500);
 
-        $ttdCell->addText('Ditandatangani secara elektronik oleh:', ['name' => 'Arial', 'size' => 11], ['alignment' => 'center']);
-        $ttdCell->addText($meta['jabatan_pengirim'], ['name' => 'Arial', 'size' => 11, 'bold' => true], ['alignment' => 'center']);
+        $ttdCell->addText('Ditandatangani secara elektronik oleh:', ['name' => 'Arial', 'size' => 11], ['alignment' => 'left']);
+        $ttdCell->addText($meta['jabatan_pengirim'], ['name' => 'Arial', 'size' => 11, 'bold' => true], ['alignment' => 'left']);
         $ttdCell->addTextBreak(2);
-        $ttdCell->addText($meta['ttd_pengirim'], ['name' => 'Arial', 'size' => 11], ['alignment' => 'center']);
+        $ttdCell->addText("        {$meta['ttd_pengirim']}", ['name' => 'Arial', 'size' => 11], ['alignment' => 'left']);
         $ttdCell->addTextBreak(2);
-        $ttdCell->addText($meta['nama_pengirim'], ['name' => 'Arial', 'size' => 11, 'bold' => true, 'underline' => 'single'], ['alignment' => 'center']);
-        $ttdCell->addText("NIP. {$meta['nip_pengirim']}", ['name' => 'Arial', 'size' => 11], ['alignment' => 'center']);
+        $ttdCell->addText($meta['nama_pengirim'], ['name' => 'Arial', 'size' => 11, 'bold' => true, 'underline' => 'single'], ['alignment' => 'left']);
+        $ttdCell->addText("NIP. {$meta['nip_pengirim']}", ['name' => 'Arial', 'size' => 11], ['alignment' => 'left']);
 
         // =========================================================================
         // PAGE BREAK
@@ -342,14 +343,13 @@ class PemindahbukuanWordService
         $ttdLampiranRow->addCell(4500); // Empty left spacer
         $ttdLampiranCell = $ttdLampiranRow->addCell(4500);
 
-        $ttdLampiranCell->addText("Pekalongan, {$meta['tanggal_naskah']}", ['name' => 'Arial', 'size' => 11], ['alignment' => 'center']);
-        $ttdLampiranCell->addText('Ditandatangani secara elektronik oleh:', ['name' => 'Arial', 'size' => 11], ['alignment' => 'center']);
-        $ttdLampiranCell->addText($meta['jabatan_pengirim'], ['name' => 'Arial', 'size' => 11, 'bold' => true], ['alignment' => 'center']);
+        $ttdLampiranCell->addText('Ditandatangani secara elektronik oleh:', ['name' => 'Arial', 'size' => 11], ['alignment' => 'left']);
+        $ttdLampiranCell->addText($meta['jabatan_pengirim'], ['name' => 'Arial', 'size' => 11, 'bold' => true], ['alignment' => 'left']);
         $ttdLampiranCell->addTextBreak(2);
-        $ttdLampiranCell->addText($meta['ttd_pengirim'], ['name' => 'Arial', 'size' => 11], ['alignment' => 'center']);
+        $ttdLampiranCell->addText("        {$meta['ttd_pengirim']}", ['name' => 'Arial', 'size' => 11], ['alignment' => 'left']);
         $ttdLampiranCell->addTextBreak(2);
-        $ttdLampiranCell->addText($meta['nama_pengirim'], ['name' => 'Arial', 'size' => 11, 'bold' => true, 'underline' => 'single'], ['alignment' => 'center']);
-        $ttdLampiranCell->addText("NIP. {$meta['nip_pengirim']}", ['name' => 'Arial', 'size' => 11], ['alignment' => 'center']);
+        $ttdLampiranCell->addText($meta['nama_pengirim'], ['name' => 'Arial', 'size' => 11, 'bold' => true, 'underline' => 'single'], ['alignment' => 'left']);
+        $ttdLampiranCell->addText("NIP. {$meta['nip_pengirim']}", ['name' => 'Arial', 'size' => 11], ['alignment' => 'left']);
 
         return $phpWord;
     }
@@ -505,13 +505,13 @@ class PemindahbukuanWordService
         $ttdRow->addCell(4500);
         $ttdCell = $ttdRow->addCell(4500);
 
-        $ttdCell->addText('Ditandatangani secara elektronik oleh:', ['name' => 'Arial', 'size' => 11], ['alignment' => 'center']);
-        $ttdCell->addText($meta['jabatan_pengirim'], ['name' => 'Arial', 'size' => 11, 'bold' => true], ['alignment' => 'center']);
+        $ttdCell->addText('Ditandatangani secara elektronik oleh:', ['name' => 'Arial', 'size' => 11], ['alignment' => 'left']);
+        $ttdCell->addText($meta['jabatan_pengirim'], ['name' => 'Arial', 'size' => 11, 'bold' => true], ['alignment' => 'left']);
         $ttdCell->addTextBreak(2);
-        $ttdCell->addText($meta['ttd_pengirim'], ['name' => 'Arial', 'size' => 11], ['alignment' => 'center']);
+        $ttdCell->addText("        {$meta['ttd_pengirim']}", ['name' => 'Arial', 'size' => 11], ['alignment' => 'left']);
         $ttdCell->addTextBreak(2);
-        $ttdCell->addText($meta['nama_pengirim'], ['name' => 'Arial', 'size' => 11, 'bold' => true, 'underline' => 'single'], ['alignment' => 'center']);
-        $ttdCell->addText("NIP. {$meta['nip_pengirim']}", ['name' => 'Arial', 'size' => 11], ['alignment' => 'center']);
+        $ttdCell->addText($meta['nama_pengirim'], ['name' => 'Arial', 'size' => 11, 'bold' => true, 'underline' => 'single'], ['alignment' => 'left']);
+        $ttdCell->addText("NIP. {$meta['nip_pengirim']}", ['name' => 'Arial', 'size' => 11], ['alignment' => 'left']);
 
         // =========================================================================
         // PAGE BREAK
@@ -610,14 +610,13 @@ class PemindahbukuanWordService
         $ttdLampiranRow->addCell(4500);
         $ttdLampiranCell = $ttdLampiranRow->addCell(4500);
 
-        $ttdLampiranCell->addText("Pekalongan, {$meta['tanggal_naskah']}", ['name' => 'Arial', 'size' => 11], ['alignment' => 'center']);
-        $ttdLampiranCell->addText('Ditandatangani secara elektronik oleh:', ['name' => 'Arial', 'size' => 11], ['alignment' => 'center']);
-        $ttdLampiranCell->addText($meta['jabatan_pengirim'], ['name' => 'Arial', 'size' => 11, 'bold' => true], ['alignment' => 'center']);
+        $ttdLampiranCell->addText('Ditandatangani secara elektronik oleh:', ['name' => 'Arial', 'size' => 11], ['alignment' => 'left']);
+        $ttdLampiranCell->addText($meta['jabatan_pengirim'], ['name' => 'Arial', 'size' => 11, 'bold' => true], ['alignment' => 'left']);
         $ttdLampiranCell->addTextBreak(2);
-        $ttdLampiranCell->addText($meta['ttd_pengirim'], ['name' => 'Arial', 'size' => 11], ['alignment' => 'center']);
+        $ttdLampiranCell->addText("        {$meta['ttd_pengirim']}", ['name' => 'Arial', 'size' => 11], ['alignment' => 'left']);
         $ttdLampiranCell->addTextBreak(2);
-        $ttdLampiranCell->addText($meta['nama_pengirim'], ['name' => 'Arial', 'size' => 11, 'bold' => true, 'underline' => 'single'], ['alignment' => 'center']);
-        $ttdLampiranCell->addText("NIP. {$meta['nip_pengirim']}", ['name' => 'Arial', 'size' => 11], ['alignment' => 'center']);
+        $ttdLampiranCell->addText($meta['nama_pengirim'], ['name' => 'Arial', 'size' => 11, 'bold' => true, 'underline' => 'single'], ['alignment' => 'left']);
+        $ttdLampiranCell->addText("NIP. {$meta['nip_pengirim']}", ['name' => 'Arial', 'size' => 11], ['alignment' => 'left']);
 
         return $phpWord;
     }
@@ -795,13 +794,13 @@ class PemindahbukuanWordService
         $ttdRow->addCell(4500); // Empty left spacer
         $ttdCell = $ttdRow->addCell(4500);
 
-        $ttdCell->addText('Ditandatangani secara elektronik oleh:', ['name' => 'Arial', 'size' => 11], ['alignment' => 'center']);
-        $ttdCell->addText($meta['jabatan_pengirim'], ['name' => 'Arial', 'size' => 11, 'bold' => true], ['alignment' => 'center']);
+        $ttdCell->addText('Ditandatangani secara elektronik oleh:', ['name' => 'Arial', 'size' => 11], ['alignment' => 'left']);
+        $ttdCell->addText($meta['jabatan_pengirim'], ['name' => 'Arial', 'size' => 11, 'bold' => true], ['alignment' => 'left']);
         $ttdCell->addTextBreak(2);
-        $ttdCell->addText($meta['ttd_pengirim'], ['name' => 'Arial', 'size' => 11], ['alignment' => 'center']);
+        $ttdCell->addText("        {$meta['ttd_pengirim']}", ['name' => 'Arial', 'size' => 11], ['alignment' => 'left']);
         $ttdCell->addTextBreak(2);
-        $ttdCell->addText($meta['nama_pengirim'], ['name' => 'Arial', 'size' => 11, 'bold' => true, 'underline' => 'single'], ['alignment' => 'center']);
-        $ttdCell->addText("NIP. {$meta['nip_pengirim']}", ['name' => 'Arial', 'size' => 11], ['alignment' => 'center']);
+        $ttdCell->addText($meta['nama_pengirim'], ['name' => 'Arial', 'size' => 11, 'bold' => true, 'underline' => 'single'], ['alignment' => 'left']);
+        $ttdCell->addText("NIP. {$meta['nip_pengirim']}", ['name' => 'Arial', 'size' => 11], ['alignment' => 'left']);
 
         // =========================================================================
         // PAGE BREAK
@@ -907,13 +906,13 @@ class PemindahbukuanWordService
         $ttdLampiranRow->addCell(4500); // Empty left spacer
         $ttdLampiranCell = $ttdLampiranRow->addCell(4500);
 
-        $ttdLampiranCell->addText('Ditandatangani secara elektronik oleh:', ['name' => 'Arial', 'size' => 11], ['alignment' => 'center']);
-        $ttdLampiranCell->addText($meta['jabatan_pengirim'], ['name' => 'Arial', 'size' => 11, 'bold' => true], ['alignment' => 'center']);
+        $ttdLampiranCell->addText('Ditandatangani secara elektronik oleh:', ['name' => 'Arial', 'size' => 11], ['alignment' => 'left']);
+        $ttdLampiranCell->addText($meta['jabatan_pengirim'], ['name' => 'Arial', 'size' => 11, 'bold' => true], ['alignment' => 'left']);
         $ttdLampiranCell->addTextBreak(2);
-        $ttdLampiranCell->addText($meta['ttd_pengirim'], ['name' => 'Arial', 'size' => 11], ['alignment' => 'center']);
+        $ttdLampiranCell->addText("        {$meta['ttd_pengirim']}", ['name' => 'Arial', 'size' => 11], ['alignment' => 'center']);
         $ttdLampiranCell->addTextBreak(2);
-        $ttdLampiranCell->addText($meta['nama_pengirim'], ['name' => 'Arial', 'size' => 11, 'bold' => true, 'underline' => 'single'], ['alignment' => 'center']);
-        $ttdLampiranCell->addText("NIP. {$meta['nip_pengirim']}", ['name' => 'Arial', 'size' => 11], ['alignment' => 'center']);
+        $ttdLampiranCell->addText($meta['nama_pengirim'], ['name' => 'Arial', 'size' => 11, 'bold' => true, 'underline' => 'single'], ['alignment' => 'left']);
+        $ttdLampiranCell->addText("NIP. {$meta['nip_pengirim']}", ['name' => 'Arial', 'size' => 11], ['alignment' => 'left']);
 
         return $phpWord;
     }
@@ -1090,13 +1089,13 @@ class PemindahbukuanWordService
         $ttdRow->addCell(4500); // Empty left spacer
         $ttdCell = $ttdRow->addCell(4500);
 
-        $ttdCell->addText('Ditandatangani secara elektronik oleh:', ['name' => 'Arial', 'size' => 11], ['alignment' => 'center']);
-        $ttdCell->addText($meta['jabatan_pengirim'], ['name' => 'Arial', 'size' => 11, 'bold' => true], ['alignment' => 'center']);
+        $ttdCell->addText('Ditandatangani secara elektronik oleh:', ['name' => 'Arial', 'size' => 11], ['alignment' => 'left']);
+        $ttdCell->addText($meta['jabatan_pengirim'], ['name' => 'Arial', 'size' => 11, 'bold' => true], ['alignment' => 'left']);
         $ttdCell->addTextBreak(2);
-        $ttdCell->addText($meta['ttd_pengirim'], ['name' => 'Arial', 'size' => 11], ['alignment' => 'center']);
+        $ttdCell->addText("        {$meta['ttd_pengirim']}", ['name' => 'Arial', 'size' => 11], ['alignment' => 'left']);
         $ttdCell->addTextBreak(2);
-        $ttdCell->addText($meta['nama_pengirim'], ['name' => 'Arial', 'size' => 11, 'bold' => true, 'underline' => 'single'], ['alignment' => 'center']);
-        $ttdCell->addText("NIP. {$meta['nip_pengirim']}", ['name' => 'Arial', 'size' => 11], ['alignment' => 'center']);
+        $ttdCell->addText($meta['nama_pengirim'], ['name' => 'Arial', 'size' => 11, 'bold' => true, 'underline' => 'single'], ['alignment' => 'left']);
+        $ttdCell->addText("NIP. {$meta['nip_pengirim']}", ['name' => 'Arial', 'size' => 11], ['alignment' => 'left']);
 
         // =========================================================================
         // PAGE BREAK
@@ -1198,13 +1197,13 @@ class PemindahbukuanWordService
         $ttdLampiranRow->addCell(4500); // Empty left spacer
         $ttdLampiranCell = $ttdLampiranRow->addCell(4500);
 
-        $ttdLampiranCell->addText('Ditandatangani secara elektronik oleh:', ['name' => 'Arial', 'size' => 11], ['alignment' => 'center']);
-        $ttdLampiranCell->addText($meta['jabatan_pengirim'], ['name' => 'Arial', 'size' => 11, 'bold' => true], ['alignment' => 'center']);
+        $ttdLampiranCell->addText('Ditandatangani secara elektronik oleh:', ['name' => 'Arial', 'size' => 11], ['alignment' => 'left']);
+        $ttdLampiranCell->addText($meta['jabatan_pengirim'], ['name' => 'Arial', 'size' => 11, 'bold' => true], ['alignment' => 'left']);
         $ttdLampiranCell->addTextBreak(2);
-        $ttdLampiranCell->addText($meta['ttd_pengirim'], ['name' => 'Arial', 'size' => 11], ['alignment' => 'center']);
+        $ttdLampiranCell->addText("        {$meta['ttd_pengirim']}", ['name' => 'Arial', 'size' => 11], ['alignment' => 'left']);
         $ttdLampiranCell->addTextBreak(2);
-        $ttdLampiranCell->addText($meta['nama_pengirim'], ['name' => 'Arial', 'size' => 11, 'bold' => true, 'underline' => 'single'], ['alignment' => 'center']);
-        $ttdLampiranCell->addText("NIP. {$meta['nip_pengirim']}", ['name' => 'Arial', 'size' => 11], ['alignment' => 'center']);
+        $ttdLampiranCell->addText($meta['nama_pengirim'], ['name' => 'Arial', 'size' => 11, 'bold' => true, 'underline' => 'single'], ['alignment' => 'left']);
+        $ttdLampiranCell->addText("NIP. {$meta['nip_pengirim']}", ['name' => 'Arial', 'size' => 11], ['alignment' => 'left']);
 
         return $phpWord;
     }

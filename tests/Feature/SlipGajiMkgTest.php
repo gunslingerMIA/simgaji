@@ -247,3 +247,52 @@ test('sukirno mkg calculates to 18 tahun 3 bulan on 1 januari 2026 from 1 oktobe
         ->and($histJan2026['mkg_tahun'])->toBe(18)
         ->and($histJan2026['mkg_bulan'])->toBe(3);
 });
+
+test('apiDetail modal review correctly resolves latest TMT acuan and MKG for Didik and Ade Suangkat', function () {
+    $user = User::factory()->create();
+
+    $kelas = RefKelasJabatan::create([
+        'kelas' => 9,
+        'basic_tpp' => 4000000,
+    ]);
+
+    $jabatan = RefJabatan::create([
+        'nama_jabatan' => 'JF Pranata Komputer Ahli Pertama',
+        'jenis_jabatan' => 'fungsional',
+        'ref_kelas_jabatan_id' => $kelas->id,
+    ]);
+
+    RefGajiPokokPns::create(['golongan' => 'III/b', 'mkg' => 4, 'nominal' => 3500000]);
+
+    // Didik: SK Pangkat 1 Mei 2026 (lebih baru dari SK KGB 1 Maret 2026)
+    $didik = Pegawai::create([
+        'nip' => '199801092022031007',
+        'nik' => '3375010901980002',
+        'nama_lengkap' => 'Didik Yogo Suro Prasojo',
+        'jenis_kelamin' => 'L',
+        'status_kepegawaian' => 'pns',
+        'status_pernikahan' => 'TK/0',
+        'ptkp_status' => 'TK/0',
+        'golongan' => 'III/b',
+        'mkg_tahun' => 4,
+        'mkg_bulan' => 2,
+        'tmt_cpns' => '2022-03-01',
+        'tmt_pangkat_terakhir' => '2026-05-01',
+        'tmt_kgb_terakhir' => '2026-03-01',
+        'nomor_rekening' => '3007289510',
+        'nama_bank' => 'Bank Jateng',
+        'nama_pada_rekening' => 'Didik Yogo Suro Prasojo',
+        'ref_jabatan_id' => $jabatan->id,
+        'is_active' => true,
+    ]);
+
+    $res = $this->actingAs($user)->getJson(route('pegawai.api.detail', $didik->id));
+    $res->assertStatus(200);
+    $data = $res->json('current_mkg');
+
+    // Pada bulan Oktober 2026, dari Mei 2026 selisih 5 bulan: 4 Thn 2 Bln + 5 Bln = 4 Thn 7 Bln
+    expect($data['tmt_acuan'])->toBe('01-05-2026')
+        ->and($data['diff_months'])->toBe(5)
+        ->and($data['tahun'])->toBe(4)
+        ->and($data['bulan'])->toBe(7);
+});

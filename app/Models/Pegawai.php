@@ -42,6 +42,8 @@ class Pegawai extends Model
         'default_potongan_zakat',
         'default_potongan_infaq',
         'default_potongan_korpri',
+        'sertifikat_pbj',
+        'sertifikat_ppk',
         'is_active',
     ];
 
@@ -53,7 +55,74 @@ class Pegawai extends Model
         'tanggal_lahir' => 'date',
         'is_active' => 'boolean',
         'is_penyetaraan' => 'boolean',
+        'sertifikat_pbj' => 'boolean',
+        'sertifikat_ppk' => 'boolean',
     ];
+
+    /**
+     * Memeriksa apakah pegawai menduduki jabatan Administrator / Eselon III (Sekretaris).
+     */
+    public function isPejabatAdministrator(?string $namaJabatan = null, ?string $kelasJabatan = null): bool
+    {
+        $nama = $namaJabatan ?? $this->jabatan?->nama_jabatan;
+        $kelas = $kelasJabatan ?? ($this->jabatan?->kelasJabatan?->kelas ?? $this->jabatan?->ref_kelas_jabatan_id);
+
+        if ($nama) {
+            $namaLower = strtolower($nama);
+            if (str_contains($namaLower, 'sekretaris')) {
+                return true;
+            }
+        }
+
+        if ((int) $kelas === 12) {
+            $isStruktural = $this->jabatan?->jenis_jabatan === 'struktural';
+            if ($isStruktural || ($nama && str_contains(strtolower($nama), 'sekretaris'))) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Menghitung persentase potongan sertifikasi PBJ / PPK.
+     * Berlaku mulai Oktober 2026 untuk Pejabat Administrator (Sekretaris):
+     * - Belum punya Sertifikat PBJ Level 1: potongan 10%
+     * - Punya Sertifikat PBJ Level 1 tapi belum Sertifikat PPK Tipe C: potongan 5%
+     * - Lengkap keduanya: 0%
+     */
+    public function getPotonganSertifikasiPersen(
+        int|string $bulan,
+        int|string $tahun,
+        ?string $namaJabatan = null,
+        ?string $kelasJabatan = null
+    ): float {
+        $bln = (int) $bulan;
+        $thn = (int) $tahun;
+
+        // Ketentuan berlaku mulai Oktober 2026
+        if ($thn < 2026 || ($thn === 2026 && $bln < 10)) {
+            return 0.00;
+        }
+
+        if (! $this->isPejabatAdministrator($namaJabatan, $kelasJabatan)) {
+            return 0.00;
+        }
+
+        // Cek sertifikat
+        $hasPbj = (bool) $this->sertifikat_pbj;
+        $hasPpk = (bool) $this->sertifikat_ppk;
+
+        if (! $hasPbj) {
+            return 10.00;
+        }
+
+        if (! $hasPpk) {
+            return 5.00;
+        }
+
+        return 0.00;
+    }
 
     public function getTppNominal(): float
     {
@@ -374,10 +443,15 @@ class Pegawai extends Model
                 // Fallback ke master data pegawai
                 $baseMonths = ((int) $this->mkg_tahun * 12) + (int) ($this->mkg_bulan ?? 0);
                 $anchor = null;
-                if ($this->tmt_pangkat_terakhir) {
-                    $anchor = Carbon::parse($this->tmt_pangkat_terakhir)->startOfMonth();
-                } elseif ($this->tmt_kgb_terakhir) {
-                    $anchor = Carbon::parse($this->tmt_kgb_terakhir)->startOfMonth();
+                $tmtPkt = $this->tmt_pangkat_terakhir ? Carbon::parse($this->tmt_pangkat_terakhir)->startOfMonth() : null;
+                $tmtKgbMaster = $this->tmt_kgb_terakhir ? Carbon::parse($this->tmt_kgb_terakhir)->startOfMonth() : null;
+
+                if ($tmtPkt && $tmtKgbMaster) {
+                    $anchor = $tmtPkt->greaterThan($tmtKgbMaster) ? $tmtPkt : $tmtKgbMaster;
+                } elseif ($tmtPkt) {
+                    $anchor = $tmtPkt;
+                } elseif ($tmtKgbMaster) {
+                    $anchor = $tmtKgbMaster;
                 } elseif ($this->tmt_cpns) {
                     $anchor = Carbon::parse($this->tmt_cpns)->startOfMonth();
                 }

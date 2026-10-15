@@ -59,5 +59,6 @@ class LampiranDaftarGajiSheet implements FromView, WithColumnWidths, WithStyles,
     {
         $sheet->getParent()->getDefaultStyle()->getFont()->setName('Arial')->setSize(9.5);
         $sheet->getStyle('A1:H100')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+        $sheet->getStyle('A1:H100')->getAlignment()->setWrapText(true);
     }
 }

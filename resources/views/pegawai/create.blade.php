@@ -147,6 +147,31 @@
                         <div class="text-muted small">Centang jika PNS merupakan hasil penyetaraan struktural (TPP disetarakan mantan jabatannya).</div>
                     </div>
                 </div>
+                <div class="col-12">
+                    <div class="p-3 bg-light rounded border">
+                        <div class="fw-semibold text-dark mb-2"><i class="fa-solid fa-certificate text-warning me-2"></i>Sertifikasi Pengadaan Barang/Jasa (Ketentuan TPP Pejabat Administrator/Eselon III)</div>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" name="sertifikat_pbj" id="sertifikatPbj" value="1" {{ old('sertifikat_pbj') ? 'checked' : '' }}>
+                                    <label class="form-check-label fw-semibold" for="sertifikatPbj">
+                                        Memiliki Sertifikat PBJ Level 1
+                                    </label>
+                                    <div class="text-muted small">Mulai Oktober 2026, jika Administrator tidak memiliki sertifikat PBJ Lvl 1 dikenakan potongan TPP 10%.</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" name="sertifikat_ppk" id="sertifikatPpk" value="1" {{ old('sertifikat_ppk') ? 'checked' : '' }}>
+                                    <label class="form-check-label fw-semibold" for="sertifikatPpk">
+                                        Memiliki Sertifikat PPK Tipe C
+                                    </label>
+                                    <div class="text-muted small">Jika memiliki sertifikat PBJ Lvl 1 namun belum ada sertifikat PPK Tipe C, dikenakan potongan TPP 5%.</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <div class="col-md-3" id="tmtCpnsField">
                     <label class="form-label fw-semibold">TMT CPNS</label>
                     <input type="date" name="tmt_cpns" class="form-control" value="{{ old('tmt_cpns') }}">

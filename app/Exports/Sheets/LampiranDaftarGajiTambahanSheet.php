@@ -48,5 +48,6 @@ class LampiranDaftarGajiTambahanSheet implements FromView, WithColumnWidths, Wit
     {
         $sheet->getParent()->getDefaultStyle()->getFont()->setName('Arial')->setSize(9.5);
         $sheet->getStyle('A1:E200')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+        $sheet->getStyle('A1:E200')->getAlignment()->setWrapText(true);
     }
 }

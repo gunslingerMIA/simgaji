@@ -5,12 +5,11 @@
     <tr><td colspan="6"></td></tr>
     <tr><td colspan="6"></td></tr>
     <tr><td colspan="6"></td></tr>
-    <tr><td colspan="6"></td></tr>
     <tr>
         <td>Nomor</td>
         <td>:</td>
-        <td colspan="2">{{ $meta['nomor_naskah'] ?? '${nomor_naskah}' }}</td>
-        <td colspan="2" style="text-align: right;">Pekalongan, {{ $meta['tanggal_naskah'] ?? '${tanggal_naskah}' }}</td>
+        <td colspan="1">{{ $meta['nomor_naskah'] ?? '${nomor_naskah}' }}</td>
+        <td colspan="3" style="text-align: left;">Pekalongan, {{ $meta['tanggal_naskah'] ?? '${tanggal_naskah}' }}</td>
     </tr>
     <tr>
         <td>Sifat</td>
@@ -25,7 +24,12 @@
     <tr>
         <td style="vertical-align: top;">Hal</td>
         <td style="vertical-align: top;">:</td>
-        <td colspan="4">Pemindahbukuan rekening TPP Bulan {{ $meta['nama_bulan'] }} {{ $meta['tahun'] }}</td>
+        <td style="vertical-align: top;" colspan="1">Permohonan Pemindahbukuan Rekening </td>
+    </tr>
+    <tr>
+        <td></td>    
+        <td></td>    
+        <td style="vertical-align: top;" colspan="1">TPP ASN Bulan {{ $meta['nama_bulan'] }} {{ $meta['tahun'] }}</td>    
     </tr>
     <tr></tr>
     <tr>

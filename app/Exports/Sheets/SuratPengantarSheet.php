@@ -68,9 +68,9 @@ class SuratPengantarSheet implements FromView, WithColumnWidths, WithDrawings, W
             'A' => 15,
             'B' => 3,
             'C' => 36,
-            'D' => 18,
+            'D' => 10,
             'E' => 5,
-            'F' => 20,
+            'F' => 18,
         ];
     }
 
@@ -90,8 +90,10 @@ class SuratPengantarSheet implements FromView, WithColumnWidths, WithDrawings, W
         $sheet->getRowDimension(7)->setRowHeight(10);
 
         // Adjust row heights for merged multiline paragraphs
-        $sheet->getRowDimension(11)->setRowHeight(28); // Hal
+        // $sheet->getRowDimension(11)->setRowHeight(28); // Hal
         $sheet->getRowDimension(18)->setRowHeight(40); // Paragraf Pembuka
+        $sheet->getRowDimension(23)->setRowHeight(30); // INfaq
+        $sheet->getRowDimension(24)->setRowHeight(30); // ZAKAT
         $sheet->getRowDimension(27)->setRowHeight(28); // Terbilang
         $sheet->getRowDimension(29)->setRowHeight(24); // Penutup
     }

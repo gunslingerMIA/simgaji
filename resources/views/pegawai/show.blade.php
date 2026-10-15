@@ -67,6 +67,29 @@
                         <div class="text-muted fw-semibold">Tambahan Penghasilan (TPP)</div>
                         <div class="fw-bold text-primary">Rp {{ number_format($pegawai->getTppNominal(), 0, ',', '.') }}</div>
                     </div>
+                    @if($pegawai->isPejabatAdministrator())
+                    <div class="mb-2 p-2 rounded bg-light border">
+                        <div class="text-muted fw-semibold small mb-1"><i class="fa-solid fa-certificate text-warning me-1"></i>Sertifikasi PBJ / PPK (Eselon III)</div>
+                        <div class="d-flex flex-column gap-1">
+                            <div>
+                                @if($pegawai->sertifikat_pbj)
+                                    <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25" style="font-size: 0.72rem;"><i class="fa-solid fa-check me-1"></i>Sertifikat PBJ Lvl 1</span>
+                                @else
+                                    <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25" style="font-size: 0.72rem;"><i class="fa-solid fa-xmark me-1"></i>Belum PBJ Lvl 1 (-10% TPP Okt)</span>
+                                @endif
+                            </div>
+                            <div>
+                                @if($pegawai->sertifikat_ppk)
+                                    <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25" style="font-size: 0.72rem;"><i class="fa-solid fa-check me-1"></i>Sertifikat PPK Tipe C</span>
+                                @else
+                                    <span class="badge {{ $pegawai->sertifikat_pbj ? 'bg-warning bg-opacity-25 text-dark border border-warning' : 'bg-secondary bg-opacity-10 text-secondary border' }}" style="font-size: 0.72rem;">
+                                        <i class="fa-solid fa-xmark me-1"></i>Belum PPK Tipe C {{ $pegawai->sertifikat_pbj ? '(-5% TPP Okt)' : '' }}
+                                    </span>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                    @endif
                     <div class="mb-2">
                         <div class="text-muted fw-semibold">Masa Kerja Golongan (MKG) &amp; Gaji Pokok</div>
                         <div>{{ $pegawai->mkg_tahun }} Tahun {{ $pegawai->mkg_bulan }} Bulan</div>

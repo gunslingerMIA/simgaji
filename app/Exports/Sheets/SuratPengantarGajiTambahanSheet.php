@@ -61,9 +61,9 @@ class SuratPengantarGajiTambahanSheet implements FromView, WithColumnWidths, Wit
             'A' => 15,
             'B' => 3,
             'C' => 36,
-            'D' => 18,
+            'D' => 10,
             'E' => 5,
-            'F' => 20,
+            'F' => 18,
         ];
     }
 
@@ -78,7 +78,7 @@ class SuratPengantarGajiTambahanSheet implements FromView, WithColumnWidths, Wit
         }
         $sheet->getRowDimension(7)->setRowHeight(10);
 
-        $sheet->getRowDimension(11)->setRowHeight(28);
+        // $sheet->getRowDimension(11)->setRowHeight(28); // Hal
         $sheet->getRowDimension(18)->setRowHeight(40);
         $sheet->getRowDimension(25)->setRowHeight(28);
         $sheet->getRowDimension(27)->setRowHeight(24);

@@ -143,6 +143,8 @@ class TppController extends Controller
             $persenTppDiterima = 100.00;
 
             // 7. Hitung Komponen TPP
+            $persenSertifikasi = $pegawai ? $pegawai->getPotonganSertifikasiPersen($bulan, $tahun, $jabatanNama, (string) $kelasJabatan) : 0.0;
+
             $calc = $this->calculateTpp(
                 $basicTpp,
                 $persenTppDiterima,
@@ -151,7 +153,9 @@ class TppController extends Controller
                 0, // Potongan seksama 0%
                 $statusKepegawaian,
                 $golongan,
-                $gajiIndukBpjs
+                $gajiIndukBpjs,
+                null,
+                $persenSertifikasi
             );
 
             $tppToInsert[] = array_merge([
@@ -211,6 +215,7 @@ class TppController extends Controller
             'persen_potongan_presensi' => 'required|numeric|min:0|max:100',
             'persen_potongan_kinerja' => 'required|numeric|min:0|max:100',
             'persen_potongan_seksama' => 'required|numeric|min:0|max:100',
+            'persen_potongan_sertifikasi' => 'nullable|numeric|min:0|max:100',
         ]);
 
         $kondisiKhusus = $request->kondisi_khusus;
@@ -255,6 +260,10 @@ class TppController extends Controller
             $persenTppDiterima = 100.00;
         }
 
+        $persenPotonganSertifikasi = $request->filled('persen_potongan_sertifikasi')
+            ? (float) $request->persen_potongan_sertifikasi
+            : (float) ($tpp->pegawai ? $tpp->pegawai->getPotonganSertifikasiPersen($tpp->bulan, $tpp->tahun, $jabatan, (string) $kelasJabatan) : ($tpp->persen_potongan_sertifikasi ?? 0));
+
         $calc = $this->calculateTpp(
             $basicTpp,
             $persenTppDiterima,
@@ -264,7 +273,8 @@ class TppController extends Controller
             $statusKepegawaian,
             $tpp->golongan,
             (float) $tpp->gaji_induk_bpjs,
-            $manualPotonganBpjs
+            $manualPotonganBpjs,
+            $persenPotonganSertifikasi
         );
 
         $tpp->update(array_merge([
@@ -365,6 +375,8 @@ class TppController extends Controller
             $kelasJabatan = $snap['kelas_jabatan'];
             $basicTpp = (float) $snap['basic_tpp'];
 
+            $persenSertifikasi = (float) $pegawai->getPotonganSertifikasiPersen($bulan, $tahun, $jabatanNama, (string) $kelasJabatan);
+
             $calc = $this->calculateTpp(
                 $basicTpp,
                 (float) $tpp->persen_tpp_diterima,
@@ -374,7 +386,8 @@ class TppController extends Controller
                 $statusKepegawaian,
                 $golongan,
                 (float) $tpp->gaji_induk_bpjs,
-                (float) $tpp->potongan_bpjs
+                (float) $tpp->potongan_bpjs,
+                $persenSertifikasi
             );
 
             $tpp->update(array_merge([
@@ -416,7 +429,8 @@ class TppController extends Controller
         ?string $statusKepegawaian,
         ?string $golongan,
         float $gajiIndukBpjs,
-        ?float $manualPotonganBpjs = null
+        ?float $manualPotonganBpjs = null,
+        float $persenSertifikasi = 0.0
     ): array {
         // TPP Efektif setelah pengali kondisi khusus (misal 50% atau 20%)
         $tppEfektif = (round($basicTpp * ($persenTppDiterima / 100)));
@@ -441,11 +455,13 @@ class TppController extends Controller
             $nomPresensi = round($tppPresensi * ($persenPresensi / 100));
             $nomKinerja = round($tppKinerja * ($persenKinerja / 100));
             $nomSeksama = round($tppSeksama * ($persenSeksama / 100));
-            $totalPotongan = $nomPresensi + $nomKinerja + $nomSeksama;
+            $nomSertifikasi = round($tppEfektif * ($persenSertifikasi / 100));
+            $totalPotongan = $nomPresensi + $nomKinerja + $nomSeksama + $nomSertifikasi;
         } else {
             $nomPresensi = 0;
             $nomKinerja = 0;
             $nomSeksama = 0;
+            $nomSertifikasi = 0;
             $totalPotongan = 0;
         }
 
@@ -481,9 +497,11 @@ class TppController extends Controller
             'persen_potongan_presensi' => $persenPresensi,
             'persen_potongan_kinerja' => $persenKinerja,
             'persen_potongan_seksama' => $persenSeksama,
+            'persen_potongan_sertifikasi' => $persenSertifikasi,
             'nominal_potongan_presensi' => $nomPresensi,
             'nominal_potongan_kinerja' => $nomKinerja,
             'nominal_potongan_seksama' => $nomSeksama,
+            'nominal_potongan_sertifikasi' => $nomSertifikasi,
             'total_potongan' => $totalPotongan,
             'tpp_kotor' => $tppKotor,
             'tarif_pajak' => $tarifPajak,

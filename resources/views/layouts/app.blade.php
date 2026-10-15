@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'Dashboard') - REKSO GAJI</title>
+    <title>@yield('title', 'Dashboard') - APP-GAJI</title>
     <!-- Vite CSS -->
     @vite(['resources/css/app.css'])
     

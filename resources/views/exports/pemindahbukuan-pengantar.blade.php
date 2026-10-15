@@ -5,12 +5,11 @@
     <tr><td colspan="6"></td></tr>
     <tr><td colspan="6"></td></tr>
     <tr><td colspan="6"></td></tr>
-    <tr><td colspan="6"></td></tr>
     <tr>
         <td>Nomor</td>
         <td>:</td>
-        <td colspan="2">{{ $meta['nomor_naskah'] ?? '${nomor_naskah}' }}</td>
-        <td colspan="2" style="text-align: right;">Pekalongan, {{ $meta['tanggal_naskah'] ?? '${tanggal_naskah}' }}</td>
+        <td colspan="1">{{ $meta['nomor_naskah'] ?? '${nomor_naskah}' }}</td>
+        <td colspan="3" style="text-align: left;">Pekalongan, {{ $meta['tanggal_naskah'] ?? '${tanggal_naskah}' }}</td>
     </tr>
     <tr>
         <td>Sifat</td>
@@ -25,7 +24,12 @@
     <tr>
         <td style="vertical-align: top;">Hal</td>
         <td style="vertical-align: top;">:</td>
-        <td colspan="4">Permohonan Pemindahbukuan Rekening Gaji {{ $meta['jenis_pegawai'] ?? 'PNS' }} Bulan {{ $meta['nama_bulan'] }} {{ $meta['tahun'] }}</td>
+        <td style="vertical-align: top;"colspan="1">Permohonan Pemindahbukuan Rekening </td>
+    </tr>
+    <tr>
+        <td></td>    
+        <td></td>    
+        <td style="vertical-align: top;"colspan="1">Gaji {{ $meta['jenis_pegawai'] ?? 'PNS' }} Bulan {{ $meta['nama_bulan'] }} {{ $meta['tahun'] }}</td>    
     </tr>
     <tr></tr>
     <tr>
@@ -69,13 +73,13 @@
     </tr>
     <tr>
         <td>2.</td>
-        <td colspan="3">Potongan INFAQ BAZNAS ke Nomor Rekening : {{ $meta['rekening_infaq_baznas'] ?? '2-007.112087' }}</td>
+        <td colspan="3">Potongan INFAQ BAZNAS ke <br>Nomor Rekening : {{ $meta['rekening_infaq_baznas'] ?? '2-007.112087' }}</td>
         <td>Rp</td>
         <td style="text-align: right;" data-format="#,##0">{{ $totalInfaq }}</td>
     </tr>
     <tr>
         <td>3.</td>
-        <td colspan="3">Potongan ZAKAT BAZNAS ke Nomor Rekening : {{ $meta['rekening_zakat_baznas'] ?? '2-007.112079' }}</td>
+        <td colspan="3">Potongan ZAKAT BAZNAS ke<br> Nomor Rekening : {{ $meta['rekening_zakat_baznas'] ?? '2-007.112079' }}</td>
         <td>Rp</td>
         <td style="text-align: right;" data-format="#,##0">{{ $totalZakat }}</td>
     </tr>
